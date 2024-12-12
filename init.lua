@@ -33,6 +33,12 @@ if vim.fn.has 'nvim' == 1 and vim.fn.executable 'nvr' == 1 then
   vim.env.GIT_EDITOR = "nvr -cc split --remote-wait +'set bufhidden=wipe'"
 end
 
+-- In your init.lua
+vim.opt.termguicolors = true
+-- Adjust these values to match the shader's background color
+vim.cmd [[highlight Normal guibg=NONE ctermbg=NONE]]
+vim.cmd [[highlight NonText guibg=NONE ctermbg=NONE]]
+
 -- Sync clipboard between OS and Neovim.
 --  Schedule the setting after `UiEnter` because it can increase startup-time.
 --  Remove this option if you want your OS clipboard to remain independent.
@@ -927,12 +933,35 @@ require('lazy').setup({
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   --    For additional information, see `:help lazy.nvim-lazy.nvim-structuring-your-plugins`
   { import = 'custom.plugins' },
+
   require 'plugins.dashboard',
+
   { 'nvzone/volt', lazy = true },
 
   {
     'nvzone/minty',
     cmd = { 'Shades', 'Huefy' },
+  },
+
+  -- lazydocker.nvim
+  {
+    'mgierada/lazydocker.nvim',
+    dependencies = { 'akinsho/toggleterm.nvim' },
+    config = function()
+      require('lazydocker').setup {
+        border = 'curved', -- valid options are "single" | "double" | "shadow" | "curved"
+      }
+    end,
+    event = 'BufRead',
+    keys = {
+      {
+        '<leader>ld',
+        function()
+          require('lazydocker').open()
+        end,
+        desc = 'Open Lazydocker floating window',
+      },
+    },
   },
 
   {

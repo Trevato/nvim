@@ -59,7 +59,7 @@ return {
     dashboard.section.buttons.val = {
       dashboard.button('f', 'Find', ':Telescope find_files<CR>'),
       dashboard.button('r', 'Recent', ':Telescope oldfiles<CR>'),
-      dashboard.button('g', 'Git', ':Telescope git_status<CR>'),
+      dashboard.button('g', 'Git', ':LazyGit<CR>'),
       dashboard.button('c', 'Commit', ':Telescope git_commits<CR>'),
       dashboard.button('q', 'Quit', ':qa<CR>'),
     }

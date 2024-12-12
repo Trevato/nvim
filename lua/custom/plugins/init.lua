@@ -2,4 +2,23 @@
 --  I promise not to create any merge conflicts in this directory :)
 --
 -- See the kickstart.nvim README for more information
-return {}
+return {
+  'trevato/alpine.nvim',
+  dir = '/users/trevato/alpine.nvim', -- Point to your local repo
+  lazy = false,
+  priority = 1000,
+  config = function()
+    require('alpine').setup {
+      transparent = true,
+      italic_comments = true,
+      bold_keywords = true,
+
+      integrations = {
+        treesitter = true,
+        telescope = true,
+        nvimtree = true,
+        lsp = true,
+      },
+    }
+  end,
+}
