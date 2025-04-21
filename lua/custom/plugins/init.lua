@@ -4,7 +4,7 @@
 -- See the kickstart.nvim README for more information
 return {
   'trevato/alpine.nvim',
-  dir = '/users/trevato/alpine.nvim', -- Point to your local repo
+  dir = '/users/trevato/projects/alpine.nvim', -- Point to your local repo
   lazy = false,
   priority = 1000,
   config = function()

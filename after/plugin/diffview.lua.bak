@@ -1,0 +1,32 @@
+-- Diffview configuration
+local status_ok, diffview = pcall(require, "diffview")
+if not status_ok then
+  vim.notify("diffview.nvim not found", vim.log.levels.WARN)
+  return
+end
+
+diffview.setup({
+  -- Add any specific configuration here
+  use_icons = true,
+  view = {
+    -- Display file history with log graph
+    file_history = {
+      git = {
+        show_merges = true,
+      },
+    },
+  },
+  enhanced_diff_hl = true, -- Enhanced highlighting for diff content
+  keymaps = {
+    view = {
+      -- Add custom keymaps for the diff view
+      ["<leader>co"] = "<Cmd>DiffviewOpen<CR>",
+      ["<leader>cc"] = "<Cmd>DiffviewClose<CR>",
+    },
+  },
+})
+
+-- Create a user command to ensure it's available globally
+vim.api.nvim_create_user_command("DiffviewMerge", function()
+  vim.cmd("DiffviewOpen")
+end, {})

@@ -560,7 +560,8 @@ require('lazy').setup({
       local servers = {
         -- clangd = {},
         -- gopls = {},
-        -- pyright = {},
+        pyright = {}, -- Python LSP for type checking and completions
+        ruff = {}, -- Ruff LSP for fast Python linting
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
@@ -602,6 +603,9 @@ require('lazy').setup({
         'stylua', -- Used to format Lua code
         'prettier', -- For JS/TS/JSX/TSX formatting
         'eslint_d', -- Fast ESLint
+        'ruff', -- Python linter
+        'ruff-lsp', -- Ruff language server
+        'pyright', -- Python LSP
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -617,9 +621,10 @@ require('lazy').setup({
           end,
         },
       }
+
+      -- Remove this block as we're configuring Ruff through the servers table above
     end,
   },
-
   { -- Autoformat
     'stevearc/conform.nvim',
     event = { 'BufWritePre' },
@@ -656,7 +661,7 @@ require('lazy').setup({
         yaml = { 'prettier' },
         markdown = { 'prettier' },
         -- Conform can also run multiple formatters sequentially
-        -- python = { "isort", "black" },
+        python = { 'isort', 'ruff' },
         --
         -- You can use 'stop_after_first' to run the first available formatter from the list
         -- javascript = { "prettierd", "prettier", stop_after_first = true },
