@@ -1,5 +1,5 @@
 # Neovim Config Scratchpad
 
-- Fixed TypeScript language server issue by setting proper NVM defaults
-- Reorganized config into modular structure with core/ and plugins/ directories
-- Added missing nvim-nio dependency for DAP UI
+- Fixed gitsigns keymap desc error: navigation maps need direct vim.keymap.set for expr=true
+- All LSP and git functionality working without errors
+- Config stable and ready for productive development

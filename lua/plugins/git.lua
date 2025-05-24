@@ -14,14 +14,13 @@ return {
       on_attach = function(bufnr)
         local gs = package.loaded.gitsigns
 
-        local function map(mode, l, r, opts)
-          opts = opts or {}
-          opts.buffer = bufnr
+        local function map(mode, l, r, desc)
+          local opts = { buffer = bufnr, desc = desc }
           vim.keymap.set(mode, l, r, opts)
         end
 
-        -- Navigation
-        map('n', ']h', function()
+        -- Navigation (special handling for expr keymaps)
+        vim.keymap.set('n', ']h', function()
           if vim.wo.diff then
             return ']h'
           end
@@ -29,9 +28,9 @@ return {
             gs.next_hunk()
           end)
           return '<Ignore>'
-        end, { expr = true, desc = 'Jump to next hunk' })
+        end, { expr = true, buffer = bufnr, desc = 'Jump to next hunk' })
 
-        map('n', '[h', function()
+        vim.keymap.set('n', '[h', function()
           if vim.wo.diff then
             return '[h'
           end
@@ -39,7 +38,7 @@ return {
             gs.prev_hunk()
           end)
           return '<Ignore>'
-        end, { expr = true, desc = 'Jump to previous hunk' })
+        end, { expr = true, buffer = bufnr, desc = 'Jump to previous hunk' })
 
         -- Actions
         map('n', '<leader>hs', gs.stage_hunk, 'Stage hunk')
@@ -65,7 +64,7 @@ return {
         map('n', '<leader>td', gs.toggle_deleted, 'Toggle deleted')
 
         -- Text object
-        map({ 'o', 'x' }, 'ih', ':<C-U>Gitsigns select_hunk<CR>', 'Select hunk')
+        vim.keymap.set({ 'o', 'x' }, 'ih', ':<C-U>Gitsigns select_hunk<CR>', { buffer = bufnr, desc = 'Select hunk' })
       end,
     },
   },

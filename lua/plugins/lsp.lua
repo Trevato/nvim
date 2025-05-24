@@ -6,8 +6,7 @@ return {
     dependencies = {
       -- LSP Management
       { 'williamboman/mason.nvim', config = true },
-      'williamboman/mason-lspconfig.nvim',
-      'WhoIsSethDaniel/mason-tool-installer.nvim',
+      -- Removed mason-lspconfig - going direct
       
       -- Additional LSP utilities
       { 'j-hui/fidget.nvim', opts = {} },
@@ -83,12 +82,12 @@ return {
       local capabilities = vim.lsp.protocol.make_client_capabilities()
       capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
 
-      -- Server configurations
+      -- Server configurations with correct lspconfig names
       local servers = {
         pyright = {}, -- Python LSP for type checking and completions
-        ruff = {}, -- Ruff LSP for fast Python linting
-        ['typescript-language-server'] = {},
-        ['eslint'] = {},
+        ruff = {}, -- Ruff language server (updated from ruff_lsp)
+        ts_ls = {}, -- TypeScript language server
+        eslint = {}, -- ESLint language server
         lua_ls = {
           settings = {
             Lua = {
@@ -100,31 +99,14 @@ return {
         },
       }
 
-      -- Mason tool installation
+      -- Direct mason setup - no mason-lspconfig
       require('mason').setup()
       
-      local ensure_installed = vim.tbl_keys(servers or {})
-      vim.list_extend(ensure_installed, {
-        'stylua', -- Lua formatter
-        'prettier', -- JS/TS/JSX/TSX formatter
-        'eslint_d', -- Fast ESLint
-        'ruff', -- Python linter
-        'ruff-lsp', -- Ruff language server
-        'pyright', -- Python LSP
-      })
-      
-      require('mason-tool-installer').setup({ ensure_installed = ensure_installed })
-      
-      -- Configure servers
-      require('mason-lspconfig').setup({
-        handlers = {
-          function(server_name)
-            local server = servers[server_name] or {}
-            server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
-            require('lspconfig')[server_name].setup(server)
-          end,
-        },
-      })
+      -- Setup each server individually
+      for server_name, server_config in pairs(servers) do
+        server_config.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server_config.capabilities or {})
+        require('lspconfig')[server_name].setup(server_config)
+      end
     end,
   },
   
