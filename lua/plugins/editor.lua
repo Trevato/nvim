@@ -193,36 +193,70 @@ return {
     'stevearc/conform.nvim',
     event = { 'BufWritePre' },
     cmd = { 'ConformInfo' },
-    opts = {
-      notify_on_error = false,
-      format_on_save = function(bufnr)
-        local disable_filetypes = { c = true, cpp = true }
-        local lsp_format_opt
-        if disable_filetypes[vim.bo[bufnr].filetype] then
-          lsp_format_opt = 'never'
+    config = function()
+      -- Global variable to control auto-formatting
+      vim.g.autoformat_enabled = false -- Start with auto-format disabled
+      
+      require('conform').setup({
+        notify_on_error = false,
+        format_on_save = function(bufnr)
+          -- Check if auto-formatting is enabled
+          if not vim.g.autoformat_enabled then
+            return nil
+          end
+          
+          local disable_filetypes = { c = true, cpp = true }
+          local lsp_format_opt
+          if disable_filetypes[vim.bo[bufnr].filetype] then
+            lsp_format_opt = 'never'
+          else
+            lsp_format_opt = 'fallback'
+          end
+          return {
+            timeout_ms = 500,
+            lsp_format = lsp_format_opt,
+          }
+        end,
+        formatters_by_ft = {
+          lua = { 'stylua' },
+          javascript = { 'prettier' },
+          typescript = { 'prettier' },
+          javascriptreact = { 'prettier' },
+          typescriptreact = { 'prettier' },
+          ['typescript.tsx'] = { 'prettier' },
+          ['javascript.jsx'] = { 'prettier' },
+          css = { 'prettier' },
+          html = { 'prettier' },
+          json = { 'prettier' },
+          yaml = { 'prettier' },
+          markdown = { 'prettier' },
+          python = { 'isort', 'ruff' },
+        },
+      })
+      
+      -- Keymaps for formatting
+      vim.keymap.set('n', '<leader>f', function()
+        require('conform').format({ async = true, lsp_format = 'fallback' })
+      end, { desc = '[F]ormat buffer' })
+      
+      -- Toggle auto-formatting
+      vim.keymap.set('n', '<leader>tf', function()
+        vim.g.autoformat_enabled = not vim.g.autoformat_enabled
+        if vim.g.autoformat_enabled then
+          vim.notify('Auto-format enabled', vim.log.levels.INFO)
         else
-          lsp_format_opt = 'fallback'
+          vim.notify('Auto-format disabled', vim.log.levels.INFO)
         end
-        return {
-          timeout_ms = 500,
-          lsp_format = lsp_format_opt,
-        }
-      end,
-      formatters_by_ft = {
-        lua = { 'stylua' },
-        javascript = { 'prettier' },
-        typescript = { 'prettier' },
-        javascriptreact = { 'prettier' },
-        typescriptreact = { 'prettier' },
-        ['typescript.tsx'] = { 'prettier' },
-        ['javascript.jsx'] = { 'prettier' },
-        css = { 'prettier' },
-        html = { 'prettier' },
-        json = { 'prettier' },
-        yaml = { 'prettier' },
-        markdown = { 'prettier' },
-        python = { 'isort', 'ruff' },
-      },
-    },
+      end, { desc = '[T]oggle auto-[F]ormat on save' })
+      
+      -- Show current auto-format status
+      vim.keymap.set('n', '<leader>?f', function()
+        if vim.g.autoformat_enabled then
+          vim.notify('Auto-format is currently ENABLED', vim.log.levels.INFO)
+        else
+          vim.notify('Auto-format is currently DISABLED', vim.log.levels.INFO)
+        end
+      end, { desc = 'Show auto-format status' })
+    end,
   },
 }
