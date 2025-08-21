@@ -1,9 +1,8 @@
 -- Theme and visual settings
 return {
-  -- Your custom Alpine theme
+  -- custom Alpine theme
   {
     'trevato/alpine.nvim',
-    dir = '/users/trevato/projects/alpine.nvim',
     lazy = false,
     priority = 1000,
     config = function()
