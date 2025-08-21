@@ -166,11 +166,35 @@ return {
     config = function()
       local lint = require('lint')
 
+      -- Dynamically choose linter based on project config
+      local function get_js_linter()
+        local root = vim.fn.getcwd()
+        if vim.fn.filereadable(root .. '/biome.json') == 1 then
+          return { 'biomejs' }
+        elseif vim.fn.filereadable(root .. '/.eslintrc.js') == 1
+          or vim.fn.filereadable(root .. '/.eslintrc.json') == 1
+          or vim.fn.filereadable(root .. '/eslint.config.js') == 1
+          or vim.fn.filereadable(root .. '/eslint.config.mjs') == 1 then
+          return { 'eslint_d' }
+        else
+          -- Default to biomejs for new projects
+          return { 'biomejs' }
+        end
+      end
+
+      -- Set linters dynamically
+      vim.api.nvim_create_autocmd({ 'BufEnter', 'BufNewFile' }, {
+        pattern = { '*.js', '*.jsx', '*.ts', '*.tsx', '*.mjs', '*.cjs' },
+        callback = function()
+          local linter = get_js_linter()
+          lint.linters_by_ft.javascript = linter
+          lint.linters_by_ft.typescript = linter
+          lint.linters_by_ft.javascriptreact = linter
+          lint.linters_by_ft.typescriptreact = linter
+        end,
+      })
+
       lint.linters_by_ft = {
-        javascript = { 'eslint_d' },
-        typescript = { 'eslint_d' },
-        javascriptreact = { 'eslint_d' },
-        typescriptreact = { 'eslint_d' },
         python = { 'ruff' },
       }
 
@@ -197,6 +221,22 @@ return {
       -- Global variable to control auto-formatting
       vim.g.autoformat_enabled = false -- Start with auto-format disabled
       
+      -- Dynamically choose formatter based on project config
+      local function get_js_formatter()
+        local root = vim.fn.getcwd()
+        if vim.fn.filereadable(root .. '/biome.json') == 1 then
+          return { 'biome' }
+        elseif vim.fn.filereadable(root .. '/.prettierrc') == 1
+          or vim.fn.filereadable(root .. '/.prettierrc.js') == 1
+          or vim.fn.filereadable(root .. '/.prettierrc.json') == 1
+          or vim.fn.filereadable(root .. '/prettier.config.js') == 1 then
+          return { 'prettier' }
+        else
+          -- Default to biome for new projects
+          return { 'biome' }
+        end
+      end
+
       require('conform').setup({
         notify_on_error = false,
         format_on_save = function(bufnr)
@@ -219,15 +259,15 @@ return {
         end,
         formatters_by_ft = {
           lua = { 'stylua' },
-          javascript = { 'prettier' },
-          typescript = { 'prettier' },
-          javascriptreact = { 'prettier' },
-          typescriptreact = { 'prettier' },
-          ['typescript.tsx'] = { 'prettier' },
-          ['javascript.jsx'] = { 'prettier' },
-          css = { 'prettier' },
+          javascript = get_js_formatter,
+          typescript = get_js_formatter,
+          javascriptreact = get_js_formatter,
+          typescriptreact = get_js_formatter,
+          ['typescript.tsx'] = get_js_formatter,
+          ['javascript.jsx'] = get_js_formatter,
+          css = get_js_formatter,
           html = { 'prettier' },
-          json = { 'prettier' },
+          json = get_js_formatter,
           yaml = { 'prettier' },
           markdown = { 'prettier' },
           python = { 'isort', 'ruff' },
