@@ -10,7 +10,6 @@ return {
       
       -- Additional LSP utilities
       { 'j-hui/fidget.nvim', opts = {} },
-      'hrsh7th/cmp-nvim-lsp',
     },
     config = function()
       -- Set up lspconfig
@@ -78,21 +77,82 @@ return {
         end,
       })
 
-      -- LSP server capabilities
+      -- LSP server capabilities (simplified without cmp-nvim-lsp)
       local capabilities = vim.lsp.protocol.make_client_capabilities()
-      capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
+      
+      -- Basic completion capabilities
+      capabilities.textDocument.completion.completionItem = {
+        documentationFormat = { 'markdown', 'plaintext' },
+        snippetSupport = true,
+        preselectSupport = true,
+        insertReplaceSupport = true,
+        labelDetailsSupport = true,
+        deprecatedSupport = true,
+        commitCharactersSupport = true,
+        tagSupport = { valueSet = { 1 } },
+        resolveSupport = {
+          properties = {
+            'documentation',
+            'detail',
+            'additionalTextEdits',
+          },
+        },
+      }
 
-      -- Server configurations with correct lspconfig names
+      -- Server configurations with modern, faster servers
       local servers = {
         pyright = {}, -- Python LSP for type checking and completions
         ruff = {}, -- Ruff language server (updated from ruff_lsp)
-        ts_ls = {}, -- TypeScript language server
-        eslint = {}, -- ESLint language server
+        vtsls = { -- Much faster TypeScript language server (5x faster than ts_ls)
+          settings = {
+            complete_function_calls = true,
+            vtsls = {
+              enableMoveToFileCodeAction = true,
+              autoUseWorkspaceTsdk = true,
+              experimental = {
+                completion = {
+                  enableServerSideFuzzyMatch = true,
+                  entriesLimit = 75,
+                },
+              },
+            },
+            typescript = {
+              updateImportsOnFileMove = { enabled = 'always' },
+              suggest = {
+                completeFunctionCalls = true,
+              },
+              inlayHints = {
+                parameterNames = { enabled = 'literals' },
+                parameterTypes = { enabled = true },
+                variableTypes = { enabled = true },
+                propertyDeclarationTypes = { enabled = true },
+                functionLikeReturnTypes = { enabled = true },
+                enumMemberValues = { enabled = true },
+              },
+            },
+          },
+        },
+        eslint = { -- ESLint language server
+          settings = {
+            workingDirectories = { mode = 'auto' },
+          },
+        },
         lua_ls = {
           settings = {
             Lua = {
               completion = {
                 callSnippet = 'Replace',
+              },
+              diagnostics = {
+                globals = { 'vim' },
+              },
+              workspace = {
+                library = {
+                  vim.fn.expand('$VIMRUNTIME/lua'),
+                  vim.fn.expand('$VIMRUNTIME/lua/vim/lsp'),
+                },
+                maxPreload = 100000,
+                preloadFileSize = 10000,
               },
             },
           },

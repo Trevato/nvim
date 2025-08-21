@@ -32,8 +32,8 @@ return {
       {
         'rcarriga/nvim-dap-ui',
         dependencies = { 
-          'nvim-nui/nui.nvim',
-          'nvim-neotest/nvim-nio', -- Add here as well for clarity
+          'MunifTanjim/nui.nvim', -- Fixed repository URL
+          'nvim-neotest/nvim-nio',
         },
         opts = {},
       },

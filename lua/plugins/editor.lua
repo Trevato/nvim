@@ -166,42 +166,59 @@ return {
     config = function()
       local lint = require('lint')
 
-      -- Dynamically choose linter based on project config
+      -- Cache for project config detection
+      local config_cache = {}
+      local cache_timeout = 5000 -- 5 seconds
+      
+      -- Optimized linter detection with caching
       local function get_js_linter()
         local root = vim.fn.getcwd()
-        if vim.fn.filereadable(root .. '/biome.json') == 1 then
-          return { 'biomejs' }
+        local cache_key = root
+        local cached = config_cache[cache_key]
+        
+        -- Return cached result if still valid
+        if cached and (vim.loop.now() - cached.time) < cache_timeout then
+          return cached.linter
+        end
+        
+        -- Check for config files (ordered by preference)
+        local linter
+        if vim.fn.filereadable(root .. '/biome.json') == 1 or 
+           vim.fn.filereadable(root .. '/biome.jsonc') == 1 then
+          linter = { 'biomejs' }
         elseif vim.fn.filereadable(root .. '/.eslintrc.js') == 1
           or vim.fn.filereadable(root .. '/.eslintrc.json') == 1
           or vim.fn.filereadable(root .. '/eslint.config.js') == 1
           or vim.fn.filereadable(root .. '/eslint.config.mjs') == 1 then
-          return { 'eslint_d' }
+          linter = { 'eslint_d' }
         else
           -- Default to biomejs for new projects
-          return { 'biomejs' }
+          linter = { 'biomejs' }
         end
+        
+        -- Cache the result
+        config_cache[cache_key] = {
+          linter = linter,
+          time = vim.loop.now()
+        }
+        
+        return linter
       end
 
-      -- Set linters dynamically
-      vim.api.nvim_create_autocmd({ 'BufEnter', 'BufNewFile' }, {
-        pattern = { '*.js', '*.jsx', '*.ts', '*.tsx', '*.mjs', '*.cjs' },
-        callback = function()
-          local linter = get_js_linter()
-          lint.linters_by_ft.javascript = linter
-          lint.linters_by_ft.typescript = linter
-          lint.linters_by_ft.javascriptreact = linter
-          lint.linters_by_ft.typescriptreact = linter
-        end,
-      })
-
+      -- Initialize linters by filetype
       lint.linters_by_ft = {
         python = { 'ruff' },
       }
 
+      -- Set JavaScript/TypeScript linters dynamically
       local lint_augroup = vim.api.nvim_create_augroup('lint', { clear = true })
       vim.api.nvim_create_autocmd({ 'BufEnter', 'BufWritePost', 'InsertLeave' }, {
         group = lint_augroup,
         callback = function()
+          local ft = vim.bo.filetype
+          if ft == 'javascript' or ft == 'typescript' or ft == 'javascriptreact' or ft == 'typescriptreact' or ft == 'json' or ft == 'jsonc' then
+            lint.linters_by_ft[ft] = get_js_linter()
+          end
           lint.try_lint()
         end,
       })
@@ -219,22 +236,45 @@ return {
     cmd = { 'ConformInfo' },
     config = function()
       -- Global variable to control auto-formatting
-      vim.g.autoformat_enabled = false -- Start with auto-format disabled
+      vim.g.autoformat_enabled = true -- Start with auto-format enabled for productivity
       
-      -- Dynamically choose formatter based on project config
+      -- Cache for config detection
+      local formatter_cache = {}
+      local cache_timeout = 5000 -- 5 seconds
+      
+      -- Optimized formatter detection with caching
       local function get_js_formatter()
         local root = vim.fn.getcwd()
-        if vim.fn.filereadable(root .. '/biome.json') == 1 then
-          return { 'biome' }
+        local cache_key = root
+        local cached = formatter_cache[cache_key]
+        
+        -- Return cached result if still valid
+        if cached and (vim.loop.now() - cached.time) < cache_timeout then
+          return cached.formatter
+        end
+        
+        -- Check for config files (Biome preferred for speed)
+        local formatter
+        if vim.fn.filereadable(root .. '/biome.json') == 1 or
+           vim.fn.filereadable(root .. '/biome.jsonc') == 1 then
+          formatter = { 'biome-check' } -- Use biome-check for format + lint fixes
         elseif vim.fn.filereadable(root .. '/.prettierrc') == 1
           or vim.fn.filereadable(root .. '/.prettierrc.js') == 1
           or vim.fn.filereadable(root .. '/.prettierrc.json') == 1
           or vim.fn.filereadable(root .. '/prettier.config.js') == 1 then
-          return { 'prettier' }
+          formatter = { 'prettier' }
         else
-          -- Default to biome for new projects
-          return { 'biome' }
+          -- Default to biome for new projects (fastest option)
+          formatter = { 'biome' }
         end
+        
+        -- Cache the result
+        formatter_cache[cache_key] = {
+          formatter = formatter,
+          time = vim.loop.now()
+        }
+        
+        return formatter
       end
 
       require('conform').setup({
@@ -253,7 +293,7 @@ return {
             lsp_format_opt = 'fallback'
           end
           return {
-            timeout_ms = 500,
+            timeout_ms = 2000, -- Increased for Biome operations
             lsp_format = lsp_format_opt,
           }
         end,
@@ -266,11 +306,28 @@ return {
           ['typescript.tsx'] = get_js_formatter,
           ['javascript.jsx'] = get_js_formatter,
           css = get_js_formatter,
+          scss = get_js_formatter,
           html = { 'prettier' },
           json = get_js_formatter,
+          jsonc = get_js_formatter,
           yaml = { 'prettier' },
           markdown = { 'prettier' },
-          python = { 'isort', 'ruff' },
+          python = { 'ruff_format', 'ruff_organize_imports' },
+        },
+        -- Configure Biome formatters
+        formatters = {
+          ['biome-check'] = {
+            command = 'biome',
+            args = { 'check', '--write', '--unsafe', '$FILENAME' },
+            stdin = false,
+            require_cwd = true,
+          },
+          ['biome-organize-imports'] = {
+            command = 'biome',
+            args = { 'check', '--formatter-enabled=false', '--linter-enabled=false', '--organize-imports-enabled=true', '--write', '$FILENAME' },
+            stdin = false,
+            require_cwd = true,
+          },
         },
       })
       
@@ -278,6 +335,14 @@ return {
       vim.keymap.set('n', '<leader>f', function()
         require('conform').format({ async = true, lsp_format = 'fallback' })
       end, { desc = '[F]ormat buffer' })
+      
+      -- Organize imports
+      vim.keymap.set('n', '<leader>fo', function()
+        require('conform').format({
+          formatters = { 'biome-organize-imports' },
+          async = true,
+        })
+      end, { desc = '[F]ormat: [O]rganize imports' })
       
       -- Toggle auto-formatting
       vim.keymap.set('n', '<leader>tf', function()

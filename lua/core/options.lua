@@ -15,13 +15,8 @@ opt.signcolumn = 'yes'
 opt.showmode = false
 opt.list = true
 opt.listchars = { tab = '» ', trail = '·', nbsp = '␣' }
-
--- Highlight current line
-opt.cursorline = true
-
--- Adjust background for transparency
-vim.cmd [[highlight Normal guibg=NONE ctermbg=NONE]]
-vim.cmd [[highlight NonText guibg=NONE ctermbg=NONE]]
+opt.pumheight = 10 -- Limit completion menu height
+opt.completeopt = 'menuone,noselect,preview' -- Better completion experience
 
 -- Persistent undo
 opt.undodir = vim.fn.expand('$HOME') .. '/.vim/undodir'

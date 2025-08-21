@@ -138,27 +138,113 @@ return {
     end,
   },
   
-  -- File Explorer
+  -- File Explorer (Oil - edit filesystem like a buffer)
   {
-    'nvim-neo-tree/neo-tree.nvim',
-    version = '*',
-    dependencies = {
-      'nvim-lua/plenary.nvim',
-      'nvim-tree/nvim-web-devicons',
-      'MunifTanjim/nui.nvim',
-    },
-    cmd = 'Neotree',
-    keys = {
-      { '\\', ':Neotree reveal<CR>', desc = 'NeoTree reveal', silent = true },
-    },
-    opts = {
-      filesystem = {
-        window = {
-          mappings = {
-            ['\\'] = 'close_window',
+    'stevearc/oil.nvim',
+    dependencies = { 'nvim-tree/nvim-web-devicons' },
+    config = function()
+      require('oil').setup({
+        default_file_explorer = true,
+        columns = {
+          'icon',
+        },
+        buf_options = {
+          buflisted = false,
+          bufhidden = 'hide',
+        },
+        win_options = {
+          wrap = false,
+          signcolumn = 'no',
+          cursorcolumn = false,
+          foldcolumn = '0',
+          spell = false,
+          list = false,
+          conceallevel = 3,
+          concealcursor = 'nvic',
+        },
+        delete_to_trash = true,
+        skip_confirm_for_simple_edits = false,
+        prompt_save_on_select_new_entry = true,
+        cleanup_delay_ms = 2000,
+        keymaps = {
+          ['g?'] = 'actions.show_help',
+          ['<CR>'] = 'actions.select',
+          ['<C-s>'] = 'actions.select_vsplit',
+          ['<C-h>'] = 'actions.select_split',
+          ['<C-t>'] = 'actions.select_tab',
+          ['<C-p>'] = 'actions.preview',
+          ['<C-c>'] = 'actions.close',
+          ['<Esc>'] = 'actions.close',
+          ['q'] = 'actions.close',
+          ['<C-l>'] = 'actions.refresh',
+          ['-'] = 'actions.parent',
+          ['_'] = 'actions.open_cwd',
+          ['`'] = 'actions.cd',
+          ['~'] = 'actions.tcd',
+          ['gs'] = 'actions.change_sort',
+          ['gx'] = 'actions.open_external',
+          ['g.'] = 'actions.toggle_hidden',
+          ['g\\'] = 'actions.toggle_trash',
+        },
+        use_default_keymaps = true,
+        view_options = {
+          show_hidden = false,
+          is_hidden_file = function(name, bufnr)
+            return vim.startswith(name, '.')
+          end,
+          is_always_hidden = function(name, bufnr)
+            return false
+          end,
+          sort = {
+            { 'type', 'asc' },
+            { 'name', 'asc' },
           },
         },
-      },
+        float = {
+          padding = 2,
+          max_width = 80,  -- Maximum 80 columns wide
+          max_height = 20, -- Maximum 20 lines tall
+          border = 'rounded',
+          win_options = {
+            winblend = 10, -- Slight transparency
+          },
+          override = function(conf)
+            -- Center the window
+            conf.row = math.floor((vim.o.lines - conf.height) / 2)
+            conf.col = math.floor((vim.o.columns - conf.width) / 2)
+            return conf
+          end,
+        },
+        preview = {
+          max_width = 0.9,
+          min_width = { 40, 0.4 },
+          width = nil,
+          max_height = 0.9,
+          min_height = { 5, 0.1 },
+          height = nil,
+          border = 'rounded',
+          win_options = {
+            winblend = 0,
+          },
+        },
+        progress = {
+          max_width = 0.9,
+          min_width = { 40, 0.4 },
+          width = nil,
+          max_height = { 10, 0.9 },
+          min_height = { 5, 0.1 },
+          height = nil,
+          border = 'rounded',
+          minimized_border = 'none',
+          win_options = {
+            winblend = 0,
+          },
+        },
+      })
+    end,
+    keys = {
+      { '-', '<cmd>Oil<cr>', desc = 'Open parent directory' },
+      { '<leader>-', function() require('oil').toggle_float() end, desc = 'Oil Float' },
     },
   },
   
@@ -215,21 +301,6 @@ return {
     },
   },
   
-  -- Mini modules for UI components
-  {
-    'echasnovski/mini.nvim',
-    config = function()
-      -- Statusline configuration
-      local statusline = require('mini.statusline')
-      statusline.setup({ use_icons = vim.g.have_nerd_font })
-
-      -- Custom statusline sections
-      ---@diagnostic disable-next-line: duplicate-set-field
-      statusline.section_location = function()
-        return '%2l:%-2v'
-      end
-    end,
-  },
   
   -- Todo comments
   {
@@ -239,42 +310,98 @@ return {
     opts = { signs = false },
   },
   
-  -- Avante for notes
+  -- Notifications
   {
-    'yetone/avante.nvim',
-    event = 'VeryLazy',
+    'rcarriga/nvim-notify',
     lazy = false,
-    version = false,
-    opts = {},
-    build = 'make',
-    dependencies = {
-      'nvim-treesitter/nvim-treesitter',
-      'stevearc/dressing.nvim',
-      'nvim-lua/plenary.nvim',
-      'MunifTanjim/nui.nvim',
-      'nvim-tree/nvim-web-devicons',
-      'zbirenbaum/copilot.lua',
-      {
-        'HakonHarnes/img-clip.nvim',
-        event = 'VeryLazy',
-        opts = {
-          default = {
-            embed_image_as_base64 = false,
-            prompt_for_file_name = false,
-            drag_and_drop = {
-              insert_mode = true,
-            },
-            use_absolute_path = true,
-          },
-        },
+    priority = 100,
+    config = function()
+      local notify = require('notify')
+      notify.setup({
+        timeout = 3000,
+        max_height = function()
+          return math.floor(vim.o.lines * 0.75)
+        end,
+        max_width = function()
+          return math.floor(vim.o.columns * 0.75)
+        end,
+        render = 'compact',
+        stages = 'fade_in_slide_out',
+        background_colour = '#000000',
+        on_open = function(win)
+          vim.api.nvim_win_set_config(win, { focusable = false })
+        end,
+      })
+      
+      -- Set notify as default notify function
+      vim.notify = notify
+      
+      -- Telescope integration
+      require('telescope').load_extension('notify')
+    end,
+  },
+  
+  -- Noice for better UI (disabled due to errors - can re-enable later)
+  -- {
+  --   'folke/noice.nvim',
+  --   enabled = false, -- Temporarily disabled due to errors
+  --   event = 'VeryLazy',
+  --   dependencies = {
+  --     'MunifTanjim/nui.nvim',
+  --     'rcarriga/nvim-notify',
+  --   },
+  --   opts = {
+  --     lsp = {
+  --       override = {
+  --         ['vim.lsp.util.convert_input_to_markdown_lines'] = false,
+  --         ['vim.lsp.util.stylize_markdown'] = false,
+  --         ['cmp.entry.get_documentation'] = false,
+  --       },
+  --     },
+  --     presets = {
+  --       bottom_search = false,
+  --       command_palette = true,
+  --       long_message_to_split = false,
+  --       inc_rename = false,
+  --       lsp_doc_border = false,
+  --     },
+  --     routes = {
+  --       {
+  --         filter = {
+  --           event = "msg_show",
+  --           kind = "",
+  --           find = "written",
+  --         },
+  --         opts = { skip = true },
+  --       },
+  --     },
+  --   },
+  -- },
+  
+  -- Better status line
+  {
+    'nvim-lualine/lualine.nvim',
+    event = 'VeryLazy',
+    opts = {
+      options = {
+        theme = 'auto',
+        globalstatus = true,
+        component_separators = { left = '', right = '' },
+        section_separators = { left = '', right = '' },
       },
-      {
-        'MeanderingProgrammer/render-markdown.nvim',
-        opts = {
-          file_types = { 'markdown', 'Avante' },
+      sections = {
+        lualine_a = { 'mode' },
+        lualine_b = { 'branch', 'diff', 'diagnostics' },
+        lualine_c = { { 'filename', path = 1 } },
+        lualine_x = {
+          'encoding',
+          'fileformat', -- Shows penguin for unix (LF), Windows icon for dos (CRLF)
+          'filetype',
         },
-        ft = { 'markdown', 'Avante' },
+        lualine_y = { 'progress' },
+        lualine_z = { 'location' },
       },
+      extensions = { 'oil', 'lazy', 'trouble' },
     },
   },
 }

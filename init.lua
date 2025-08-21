@@ -13,6 +13,7 @@ require('core.options')    -- vim options
 require('core.keymaps')    -- global keymaps
 require('core.autocmds')   -- autocommands
 require('core.plugins')    -- plugin management
+require('core.debug')      -- debug helpers
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et

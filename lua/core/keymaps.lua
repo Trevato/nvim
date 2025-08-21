@@ -29,3 +29,28 @@ keymap('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
 keymap('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
 keymap('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 keymap('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+
+-- Notification management
+keymap('n', '<leader>un', function()
+  require('notify').dismiss({ silent = true, pending = true })
+end, { desc = 'Dismiss all notifications' })
+
+keymap('n', '<leader>uN', function()
+  require('telescope').extensions.notify.notify()
+end, { desc = 'Search [N]otifications history' })
+
+-- Error management
+keymap('n', '<leader>ue', function()
+  require('core.debug').copy_errors()
+end, { desc = 'Copy [E]rrors to clipboard' })
+
+keymap('n', '<leader>ua', function()
+  require('core.debug').copy_notifications()
+end, { desc = 'Copy [A]ll notifications to clipboard' })
+
+-- Temporary completion keymaps (until nvim-cmp is fixed)
+keymap('i', '<C-n>', '<C-n>', { desc = 'Next completion item' })
+keymap('i', '<C-p>', '<C-p>', { desc = 'Previous completion item' })
+keymap('i', '<C-y>', '<C-y>', { desc = 'Confirm completion' })
+keymap('i', '<C-e>', '<C-e>', { desc = 'Cancel completion' })
+keymap('i', '<C-Space>', '<C-x><C-o>', { desc = 'Trigger completion' })
