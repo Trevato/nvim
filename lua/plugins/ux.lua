@@ -30,6 +30,19 @@ return {
         view_history = 'messages',
         view_search = 'virtualtext',
       },
+      notify = {
+        enabled = true,
+        view = 'notify',
+      },
+      views = {
+        notify = {
+          -- Slide + fade animation
+          render = 'compact',
+          stages = 'fade_in_slide_out',
+          timeout = 3000,
+          top_down = false, -- Notifications from bottom
+        },
+      },
       popupmenu = {
         enabled = true,
         backend = 'nui',
@@ -126,46 +139,7 @@ return {
     },
   },
 
-  -- Smooth animations (craftzdog + echasnovski patterns)
-  {
-    'echasnovski/mini.animate',
-    event = 'VeryLazy',
-    opts = function()
-      -- Don't animate when scrolling with mouse
-      local mouse_scrolled = false
-      for _, scroll in ipairs({ 'Up', 'Down' }) do
-        local key = '<ScrollWheel' .. scroll .. '>'
-        vim.keymap.set({ '', 'i' }, key, function()
-          mouse_scrolled = true
-          return key
-        end, { expr = true })
-      end
-
-      local animate = require('mini.animate')
-      return {
-        cursor = {
-          timing = animate.gen_timing.linear({ duration = 50, unit = 'total' }),
-        },
-        scroll = {
-          timing = animate.gen_timing.linear({ duration = 150, unit = 'total' }),
-          subscroll = animate.gen_subscroll.equal({
-            predicate = function(total_scroll)
-              if mouse_scrolled then
-                mouse_scrolled = false
-                return false
-              end
-              return total_scroll > 1
-            end,
-          }),
-        },
-        resize = {
-          timing = animate.gen_timing.linear({ duration = 50, unit = 'total' }),
-        },
-        open = { enable = false }, -- Too distracting
-        close = { enable = false }, -- Too distracting
-      }
-    end,
-  },
+  -- Removed mini.animate - keeping config minimal
 
   -- Better input/select UI (like dressing room for Neovim)
   {
@@ -295,6 +269,29 @@ return {
         }
       end
       
+      -- Animated startup stats
+      local function get_animated_stats()
+        local stats = require('lazy').stats()
+        local ms = math.floor(stats.startuptime * 100 + 0.5) / 100
+        
+        -- Create animated counter effect
+        vim.defer_fn(function()
+          local count = 0
+          local timer = vim.loop.new_timer()
+          timer:start(0, 30, vim.schedule_wrap(function()
+            count = count + math.ceil(stats.loaded / 10)
+            if count >= stats.loaded then
+              count = stats.loaded
+              timer:stop()
+            end
+            dashboard.section.footer.val[6] = '⚡ ' .. count .. '/' .. stats.count .. ' plugins in ' .. ms .. 'ms'
+            pcall(vim.cmd, 'AlphaRedraw')
+          end))
+        end, 100)
+        
+        return '⚡ 0/' .. stats.count .. ' plugins in ' .. ms .. 'ms'
+      end
+      
       dashboard.section.header.val = get_header()
       
       -- Clean, minimal buttons with consistent spacing
@@ -308,14 +305,14 @@ return {
         dashboard.button('q', '  Quit', ':qa<CR>'),
       }
       
-      -- Footer with links and stats
+      -- Footer with links and animated stats
       dashboard.section.footer.val = {
         '',
         '───────────────────────────────────────────────',
         '',
         '  trevato.dev   •     github.com/trevato',
         '',
-        get_stats(),
+        get_animated_stats(),
         '',
       }
       
@@ -324,7 +321,7 @@ return {
       dashboard.section.buttons.opts.hl = 'Normal'
       dashboard.section.footer.opts.hl = 'Comment'
       
-      -- Center everything
+      -- Center everything with fade-in animation
       dashboard.opts.layout = {
         { type = 'padding', val = vim.fn.max({ 1, vim.fn.floor(vim.fn.winheight(0) * 0.1) }) },
         dashboard.section.header,
@@ -333,6 +330,13 @@ return {
         { type = 'padding', val = 2 },
         dashboard.section.footer,
       }
+      
+      -- Fade-in animation for dashboard
+      vim.defer_fn(function()
+        vim.cmd('highlight AlphaHeader guifg=#7aa2f7 gui=bold')
+        vim.cmd('highlight AlphaButtons guifg=#9ece6a')
+        vim.cmd('highlight AlphaFooter guifg=#565f89')
+      end, 10)
       
       -- Refresh on focus to update time
       vim.api.nvim_create_autocmd('User', {
