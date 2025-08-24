@@ -4,13 +4,16 @@ return {
   {
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
-    main = 'nvim-treesitter.configs',
-    opts = {
+    event = { 'BufReadPost', 'BufNewFile' },
+    config = function()
+      require('nvim-treesitter.configs').setup({
       ensure_installed = {
         'bash',
         'c',
         'diff',
         'html',
+        'json',
+        'jsonc',
         'lua',
         'luadoc',
         'markdown',
@@ -22,14 +25,31 @@ return {
         'typescript',
         'tsx',
         'python',
+        'yaml',
+        'toml',
+        'css',
+        'scss',
       },
       auto_install = true,
+      sync_install = false,
       highlight = {
         enable = true,
-        additional_vim_regex_highlighting = { 'ruby' },
+        additional_vim_regex_highlighting = false,
       },
-      indent = { enable = true, disable = { 'ruby' } },
-    },
+      indent = { 
+        enable = true,
+      },
+      incremental_selection = {
+        enable = true,
+        keymaps = {
+          init_selection = '<C-space>',
+          node_incremental = '<C-space>',
+          scope_incremental = false,
+          node_decremental = '<bs>',
+        },
+      },
+    })
+    end,
   },
   
   -- Telescope - fuzzy finder

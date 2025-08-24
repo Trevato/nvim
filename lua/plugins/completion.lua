@@ -1,21 +1,30 @@
--- Completion and snippets (MINIMAL VERSION TO FIX ERRORS)
+-- Modern, fast completion with blink.cmp
 return {
-  -- Autocompletion - DISABLED DUE TO PERSISTENT ERRORS
-  -- We'll use built-in completion for now
   {
-    'hrsh7th/nvim-cmp',
-    enabled = false, -- DISABLED until we fix the issue
-  },
-  
-  -- Keep LuaSnip for snippets
-  {
-    'L3MON4D3/LuaSnip',
-    event = 'InsertEnter',
-    config = function()
-      require('luasnip').setup({
-        history = true,
-        delete_check_events = 'TextChanged',
-      })
-    end,
+    'saghen/blink.cmp',
+    version = 'v0.*',
+    lazy = false,
+    dependencies = {
+      'rafamadriz/friendly-snippets',
+    },
+    opts = {
+      -- Simple, working configuration
+      keymap = { preset = 'default' },
+      
+      appearance = {
+        use_nvim_cmp_as_default = true,
+        nerd_font_variant = 'mono',
+      },
+      
+      sources = {
+        default = { 'lsp', 'path', 'snippets', 'buffer' },
+      },
+      
+      completion = {
+        documentation = {
+          auto_show = true,
+        },
+      },
+    },
   },
 }

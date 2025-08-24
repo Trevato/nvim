@@ -1,184 +1,141 @@
--- LSP configuration
+-- LSP configuration optimized for blink.cmp
 return {
-  -- Main LSP Configuration
   {
     'neovim/nvim-lspconfig',
+    event = { 'BufReadPre', 'BufNewFile' },
     dependencies = {
-      -- LSP Management
       { 'williamboman/mason.nvim', config = true },
-      -- Removed mason-lspconfig - going direct
-      
-      -- Additional LSP utilities
       { 'j-hui/fidget.nvim', opts = {} },
+      'saghen/blink.cmp',
     },
     config = function()
-      -- Set up lspconfig
       local lspconfig = require('lspconfig')
       
-      -- LSP Attach autocmd
+      -- Get blink.cmp capabilities if available
+      local capabilities = vim.lsp.protocol.make_client_capabilities()
+      local has_blink, blink = pcall(require, 'blink.cmp')
+      if has_blink then
+        capabilities = blink.get_lsp_capabilities(capabilities)
+      end
+      
+      -- TypeScript/JavaScript (vtsls is 5x faster than ts_ls)
+      lspconfig.vtsls.setup({
+        capabilities = capabilities,
+        settings = {
+          complete_function_calls = true,
+          vtsls = {
+            enableMoveToFileCodeAction = true,
+            autoUseWorkspaceTsdk = true,
+            experimental = {
+              completion = {
+                enableServerSideFuzzyMatch = true,
+                entriesLimit = 75,
+              },
+            },
+          },
+          typescript = {
+            updateImportsOnFileMove = { enabled = 'always' },
+            suggest = {
+              completeFunctionCalls = true,
+              includeCompletionsForModuleExports = true,
+              includeAutomaticOptionalChainCompletions = true,
+            },
+            preferences = {
+              preferTypeOnlyAutoImports = true,
+            },
+          },
+        },
+      })
+      
+      -- Python
+      lspconfig.pyright.setup({
+        capabilities = capabilities,
+        settings = {
+          python = {
+            analysis = {
+              autoSearchPaths = true,
+              useLibraryCodeForTypes = true,
+              typeCheckingMode = 'basic',
+            },
+          },
+        },
+      })
+      
+      -- Lua
+      lspconfig.lua_ls.setup({
+        capabilities = capabilities,
+        settings = {
+          Lua = {
+            runtime = { version = 'LuaJIT' },
+            diagnostics = { globals = { 'vim' } },
+            workspace = {
+              library = vim.api.nvim_get_runtime_file('', true),
+              checkThirdParty = false,
+            },
+            telemetry = { enable = false },
+            completion = {
+              callSnippet = 'Replace',
+            },
+          },
+        },
+      })
+      
+      -- ESLint (if available)
+      pcall(function()
+        lspconfig.eslint.setup({
+          capabilities = capabilities,
+          on_attach = function(client, bufnr)
+            vim.api.nvim_create_autocmd('BufWritePre', {
+              buffer = bufnr,
+              command = 'EslintFixAll',
+            })
+          end,
+        })
+      end)
+      
+      -- Keymaps on LSP attach
       vim.api.nvim_create_autocmd('LspAttach', {
-        group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
-        callback = function(event)
-          -- Helper function for mappings
-          local map = function(keys, func, desc, mode)
-            mode = mode or 'n'
-            vim.keymap.set(mode, keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
-          end
-
+        group = vim.api.nvim_create_augroup('UserLspConfig', { clear = true }),
+        callback = function(ev)
+          local opts = { buffer = ev.buf }
+          
           -- Navigation
-          map('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
-          map('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
-          map('gI', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
-          map('<leader>D', require('telescope.builtin').lsp_type_definitions, 'Type [D]efinition')
+          vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
+          vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
+          vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
+          vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, opts)
+          vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
+          vim.keymap.set('n', '<leader>D', vim.lsp.buf.type_definition, opts)
           
-          -- Document symbols
-          map('<leader>ds', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
-          map('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
+          -- Actions
+          vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, opts)
+          vim.keymap.set({ 'n', 'v' }, '<leader>ca', vim.lsp.buf.code_action, opts)
+          vim.keymap.set('n', '<leader>f', function()
+            vim.lsp.buf.format { async = true }
+          end, opts)
           
-          -- Code actions
-          map('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
-          map('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction', { 'n', 'x' })
-          
-          -- Declaration
-          map('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
-          
-          -- Document highlight
-          local client = vim.lsp.get_client_by_id(event.data.client_id)
-          if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
-            local highlight_augroup = vim.api.nvim_create_augroup('kickstart-lsp-highlight', { clear = false })
-            
-            vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
-              buffer = event.buf,
-              group = highlight_augroup,
-              callback = vim.lsp.buf.document_highlight,
-            })
-
-            vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI' }, {
-              buffer = event.buf,
-              group = highlight_augroup,
-              callback = vim.lsp.buf.clear_references,
-            })
-
-            vim.api.nvim_create_autocmd('LspDetach', {
-              group = vim.api.nvim_create_augroup('kickstart-lsp-detach', { clear = true }),
-              callback = function(event2)
-                vim.lsp.buf.clear_references()
-                vim.api.nvim_clear_autocmds({ group = 'kickstart-lsp-highlight', buffer = event2.buf })
-              end,
-            })
-          end
-          
-          -- Inlay hints
-          if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint) then
-            map('<leader>th', function()
-              vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = event.buf }))
-            end, '[T]oggle Inlay [H]ints')
-          end
+          -- Signature help
+          vim.keymap.set('i', '<C-k>', vim.lsp.buf.signature_help, opts)
         end,
       })
-
-      -- LSP server capabilities (simplified without cmp-nvim-lsp)
-      local capabilities = vim.lsp.protocol.make_client_capabilities()
       
-      -- Basic completion capabilities
-      capabilities.textDocument.completion.completionItem = {
-        documentationFormat = { 'markdown', 'plaintext' },
-        snippetSupport = true,
-        preselectSupport = true,
-        insertReplaceSupport = true,
-        labelDetailsSupport = true,
-        deprecatedSupport = true,
-        commitCharactersSupport = true,
-        tagSupport = { valueSet = { 1 } },
-        resolveSupport = {
-          properties = {
-            'documentation',
-            'detail',
-            'additionalTextEdits',
-          },
+      -- Diagnostics
+      vim.diagnostic.config({
+        virtual_text = {
+          prefix = '●',
         },
-      }
-
-      -- Server configurations with modern, faster servers
-      local servers = {
-        pyright = {}, -- Python LSP for type checking and completions
-        ruff = {}, -- Ruff language server (updated from ruff_lsp)
-        vtsls = { -- Much faster TypeScript language server (5x faster than ts_ls)
-          settings = {
-            complete_function_calls = true,
-            vtsls = {
-              enableMoveToFileCodeAction = true,
-              autoUseWorkspaceTsdk = true,
-              experimental = {
-                completion = {
-                  enableServerSideFuzzyMatch = true,
-                  entriesLimit = 75,
-                },
-              },
-            },
-            typescript = {
-              updateImportsOnFileMove = { enabled = 'always' },
-              suggest = {
-                completeFunctionCalls = true,
-              },
-              inlayHints = {
-                parameterNames = { enabled = 'literals' },
-                parameterTypes = { enabled = true },
-                variableTypes = { enabled = true },
-                propertyDeclarationTypes = { enabled = true },
-                functionLikeReturnTypes = { enabled = true },
-                enumMemberValues = { enabled = true },
-              },
-            },
-          },
-        },
-        eslint = { -- ESLint language server
-          settings = {
-            workingDirectories = { mode = 'auto' },
-          },
-        },
-        lua_ls = {
-          settings = {
-            Lua = {
-              completion = {
-                callSnippet = 'Replace',
-              },
-              diagnostics = {
-                globals = { 'vim' },
-              },
-              workspace = {
-                library = {
-                  vim.fn.expand('$VIMRUNTIME/lua'),
-                  vim.fn.expand('$VIMRUNTIME/lua/vim/lsp'),
-                },
-                maxPreload = 100000,
-                preloadFileSize = 10000,
-              },
-            },
-          },
-        },
-      }
-
-      -- Direct mason setup - no mason-lspconfig
-      require('mason').setup()
+        signs = true,
+        underline = true,
+        update_in_insert = false,
+        severity_sort = true,
+      })
       
-      -- Setup each server individually
-      for server_name, server_config in pairs(servers) do
-        server_config.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server_config.capabilities or {})
-        require('lspconfig')[server_name].setup(server_config)
+      -- Diagnostic signs
+      local signs = { Error = '󰅚 ', Warn = '󰀪 ', Hint = '󰌶 ', Info = ' ' }
+      for type, icon in pairs(signs) do
+        local hl = 'DiagnosticSign' .. type
+        vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
       end
     end,
   },
-  
-  -- Lua LSP configuration
-  {
-    'folke/lazydev.nvim',
-    ft = 'lua',
-    opts = {
-      library = {
-        { path = 'luvit-meta/library', words = { 'vim%.uv' } },
-      },
-    },
-  },
-  { 'Bilal2453/luvit-meta', lazy = true },
 }
