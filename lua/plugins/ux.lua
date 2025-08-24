@@ -255,27 +255,99 @@ return {
       local alpha = require('alpha')
       local dashboard = require('alpha.themes.dashboard')
       
-      -- Minimal header inspired by craftzdog
-      dashboard.section.header.val = {
+      -- Get current time info
+      local function get_greeting()
+        local hour = tonumber(os.date('%H'))
+        local greeting
+        if hour < 12 then
+          greeting = '  Good morning'
+        elseif hour < 18 then
+          greeting = '  Good afternoon'
+        else
+          greeting = '  Good evening'
+        end
+        return greeting
+      end
+      
+      -- Get stats
+      local function get_stats()
+        local stats = require('lazy').stats()
+        local ms = (math.floor(stats.startuptime * 100 + 0.5) / 100)
+        return '⚡ ' .. stats.loaded .. '/' .. stats.count .. ' plugins in ' .. ms .. 'ms'
+      end
+      
+      -- Personalized header with real-time info
+      local function get_header()
+        return {
+          '',
+          '',
+          '████████╗██████╗ ███████╗██╗   ██╗ █████╗ ████████╗ ██████╗ ',
+          '╚══██╔══╝██╔══██╗██╔════╝██║   ██║██╔══██╗╚══██╔══╝██╔═══██╗',
+          '   ██║   ██████╔╝█████╗  ██║   ██║███████║   ██║   ██║   ██║',
+          '   ██║   ██╔══██╗██╔══╝  ╚██╗ ██╔╝██╔══██║   ██║   ██║   ██║',
+          '   ██║   ██║  ██║███████╗ ╚████╔╝ ██║  ██║   ██║   ╚██████╔╝',
+          '   ╚═╝   ╚═╝  ╚═╝╚══════╝  ╚═══╝  ╚═╝  ╚═╝   ╚═╝    ╚═════╝ ',
+          '',
+          get_greeting(),
+          os.date('  %A, %B %d, %Y'),
+          '  ' .. os.date('%I:%M %p'),
+          '',
+        }
+      end
+      
+      dashboard.section.header.val = get_header()
+      
+      -- Clean, minimal buttons with consistent spacing
+      dashboard.section.buttons.val = {
+        dashboard.button('f', '  Find file', ':Telescope find_files <CR>'),
+        dashboard.button('r', '  Recent', ':Telescope oldfiles <CR>'),
+        dashboard.button('g', '  Grep', ':Telescope live_grep <CR>'),
+        dashboard.button('n', '  New', ':ene <BAR> startinsert <CR>'),
+        dashboard.button('s', '  Session', ':SessionRestore <CR>'),
+        dashboard.button('l', '  Lazy', ':Lazy<CR>'),
+        dashboard.button('q', '  Quit', ':qa<CR>'),
+      }
+      
+      -- Footer with links and stats
+      dashboard.section.footer.val = {
         '',
+        '───────────────────────────────────────────────',
         '',
+        '  trevato.dev   •     github.com/trevato',
         '',
-        '   ◉    ',
-        '',
-        '',
+        get_stats(),
         '',
       }
       
-      -- Useful buttons
-      dashboard.section.buttons.val = {
-        dashboard.button('f', '  Find file', ':Telescope find_files <CR>'),
-        dashboard.button('n', '  New file', ':ene <BAR> startinsert <CR>'),
-        dashboard.button('r', '  Recent files', ':Telescope oldfiles <CR>'),
-        dashboard.button('g', '  Find text', ':Telescope live_grep <CR>'),
-        dashboard.button('s', '  Restore session', ':lua require("persistence").load() <CR>'),
-        dashboard.button('l', '󰒲  Lazy', ':Lazy<CR>'),
-        dashboard.button('q', '  Quit', ':qa<CR>'),
+      -- Styling
+      dashboard.section.header.opts.hl = 'Function'
+      dashboard.section.buttons.opts.hl = 'Normal'
+      dashboard.section.footer.opts.hl = 'Comment'
+      
+      -- Center everything
+      dashboard.opts.layout = {
+        { type = 'padding', val = vim.fn.max({ 1, vim.fn.floor(vim.fn.winheight(0) * 0.1) }) },
+        dashboard.section.header,
+        { type = 'padding', val = 2 },
+        dashboard.section.buttons,
+        { type = 'padding', val = 2 },
+        dashboard.section.footer,
       }
+      
+      -- Refresh on focus to update time
+      vim.api.nvim_create_autocmd('User', {
+        pattern = 'AlphaReady',
+        callback = function()
+          vim.api.nvim_create_autocmd('FocusGained', {
+            buffer = 0,
+            callback = function()
+              dashboard.section.header.val = get_header()
+              dashboard.section.footer.val[6] = get_stats()
+              vim.cmd('AlphaRedraw')
+            end,
+          })
+        end,
+      })
       
       -- Hide statusline and tabline in dashboard
       vim.api.nvim_create_autocmd('User', {
