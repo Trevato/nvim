@@ -218,4 +218,131 @@ return {
     event = 'VeryLazy',
     config = true,
   },
+
+  -- Oil.nvim: Edit filesystem like a buffer (craftzdog style)
+  {
+    'stevearc/oil.nvim',
+    dependencies = { 'nvim-tree/nvim-web-devicons' },
+    config = function()
+      require('oil').setup({
+        default_file_explorer = true,
+        columns = { 'icon' },
+        buf_options = {
+          buflisted = false,
+          bufhidden = 'hide',
+        },
+        win_options = {
+          wrap = false,
+          signcolumn = 'no',
+          cursorcolumn = false,
+          foldcolumn = '0',
+          spell = false,
+          list = false,
+          conceallevel = 3,
+          concealcursor = 'nvic',
+        },
+        delete_to_trash = true,
+        skip_confirm_for_simple_edits = true,
+        prompt_save_on_select_new_entry = false,
+        cleanup_delay_ms = 2000,
+        keymaps = {
+          ['g?'] = 'actions.show_help',
+          ['<CR>'] = 'actions.select',
+          ['<C-s>'] = 'actions.select_vsplit',
+          ['<C-h>'] = 'actions.select_split',
+          ['<C-t>'] = 'actions.select_tab',
+          ['<C-p>'] = 'actions.preview',
+          ['<C-c>'] = 'actions.close',
+          ['<C-l>'] = 'actions.refresh',
+          ['-'] = 'actions.parent',
+          ['_'] = 'actions.open_cwd',
+          ['`'] = 'actions.cd',
+          ['~'] = 'actions.tcd',
+          ['gs'] = 'actions.change_sort',
+          ['gx'] = 'actions.open_external',
+          ['g.'] = 'actions.toggle_hidden',
+          ['g\\'] = 'actions.toggle_trash',
+        },
+        view_options = {
+          show_hidden = true,
+          is_hidden_file = function(name, _)
+            return vim.startswith(name, '.')
+          end,
+          is_always_hidden = function(name, _)
+            return name == '..' or name == '.git'
+          end,
+        },
+        float = {
+          padding = 2,
+          max_width = 80,
+          max_height = 40,
+          border = 'rounded',
+          win_options = {
+            winblend = 0,
+          },
+        },
+      })
+      
+      -- Keymaps
+      vim.keymap.set('n', '-', '<CMD>Oil<CR>', { desc = 'Open parent directory' })
+      vim.keymap.set('n', '<leader>-', function()
+        require('oil').toggle_float()
+      end, { desc = 'Open parent directory (float)' })
+    end,
+  },
+
+  -- Smart splits (like tmux but better)
+  {
+    'mrjones2014/smart-splits.nvim',
+    lazy = false,
+    config = function()
+      local smart_splits = require('smart-splits')
+      smart_splits.setup({
+        ignored_filetypes = { 'nofile', 'quickfix', 'prompt' },
+        ignored_buftypes = { 'NvimTree' },
+        default_amount = 3,
+        move_cursor_same_row = false,
+        resize_mode = {
+          quit_key = '<ESC>',
+          resize_keys = { 'h', 'j', 'k', 'l' },
+          silent = false,
+        },
+      })
+      
+      -- Navigation
+      vim.keymap.set('n', '<C-h>', smart_splits.move_cursor_left, { desc = 'Move to left split' })
+      vim.keymap.set('n', '<C-j>', smart_splits.move_cursor_down, { desc = 'Move to below split' })
+      vim.keymap.set('n', '<C-k>', smart_splits.move_cursor_up, { desc = 'Move to above split' })
+      vim.keymap.set('n', '<C-l>', smart_splits.move_cursor_right, { desc = 'Move to right split' })
+      
+      -- Resizing
+      vim.keymap.set('n', '<A-h>', smart_splits.resize_left, { desc = 'Resize split left' })
+      vim.keymap.set('n', '<A-j>', smart_splits.resize_down, { desc = 'Resize split down' })
+      vim.keymap.set('n', '<A-k>', smart_splits.resize_up, { desc = 'Resize split up' })
+      vim.keymap.set('n', '<A-l>', smart_splits.resize_right, { desc = 'Resize split right' })
+    end,
+  },
+
+  -- Project management
+  {
+    'ahmedkhalf/project.nvim',
+    config = function()
+      require('project_nvim').setup({
+        manual_mode = false,
+        detection_methods = { 'lsp', 'pattern' },
+        patterns = { '.git', '_darcs', '.hg', '.bzr', '.svn', 'Makefile', 'package.json' },
+        ignore_lsp = {},
+        exclude_dirs = {},
+        show_hidden = false,
+        silent_chdir = true,
+        scope_chdir = 'global',
+        datapath = vim.fn.stdpath('data'),
+      })
+      
+      -- Integrate with Telescope
+      require('telescope').load_extension('projects')
+      
+      vim.keymap.set('n', '<leader>fp', '<cmd>Telescope projects<cr>', { desc = 'Find projects' })
+    end,
+  },
 }
