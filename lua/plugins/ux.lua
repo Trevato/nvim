@@ -110,10 +110,10 @@ return {
       -- but this is not ideal when Lazy is installing plugins,
       -- so clear the messages in this case.
       if vim.o.filetype == 'lazy' then
-        vim.cmd([[messages clear]])
+        vim.cmd [[messages clear]]
       end
       require('noice').setup(opts)
-      
+
       -- Set cmdheight to 0 after Noice loads
       vim.opt.cmdheight = 0
     end,
@@ -173,20 +173,29 @@ return {
     event = { 'BufReadPost', 'BufNewFile' },
     opts = {
       symbol = '│',
-      options = { 
+      options = {
         try_as_border = true,
         border = 'both',
       },
       draw = {
         delay = 0,
-        animation = function() return 0 end, -- No animation, instant
+        animation = function()
+          return 0
+        end, -- No animation, instant
       },
     },
     init = function()
       vim.api.nvim_create_autocmd('FileType', {
         pattern = {
-          'help', 'dashboard', 'neo-tree', 'Trouble', 'lazy', 'mason',
-          'notify', 'toggleterm', 'lazyterm',
+          'help',
+          'dashboard',
+          'neo-tree',
+          'Trouble',
+          'lazy',
+          'mason',
+          'notify',
+          'toggleterm',
+          'lazyterm',
         },
         callback = function()
           vim.b.miniindentscope_disable = true
@@ -226,12 +235,12 @@ return {
     'goolord/alpha-nvim',
     event = 'VimEnter',
     config = function()
-      local alpha = require('alpha')
-      local dashboard = require('alpha.themes.dashboard')
-      
+      local alpha = require 'alpha'
+      local dashboard = require 'alpha.themes.dashboard'
+
       -- Get current time info
       local function get_greeting()
-        local hour = tonumber(os.date('%H'))
+        local hour = tonumber(os.date '%H')
         local greeting
         if hour < 12 then
           greeting = '  Good morning'
@@ -242,14 +251,7 @@ return {
         end
         return greeting
       end
-      
-      -- Get stats
-      local function get_stats()
-        local stats = require('lazy').stats()
-        local ms = (math.floor(stats.startuptime * 100 + 0.5) / 100)
-        return '⚡ ' .. stats.loaded .. '/' .. stats.count .. ' plugins in ' .. ms .. 'ms'
-      end
-      
+
       -- Personalized header with real-time info
       local function get_header()
         return {
@@ -263,37 +265,14 @@ return {
           '   ╚═╝   ╚═╝  ╚═╝╚══════╝  ╚═══╝  ╚═╝  ╚═╝   ╚═╝    ╚═════╝ ',
           '',
           get_greeting(),
-          os.date('  %A, %B %d, %Y'),
-          '  ' .. os.date('%I:%M %p'),
+          os.date '  %A, %B %d, %Y',
+          '  ' .. os.date '%I:%M %p',
           '',
         }
       end
-      
-      -- Animated startup stats
-      local function get_animated_stats()
-        local stats = require('lazy').stats()
-        local ms = math.floor(stats.startuptime * 100 + 0.5) / 100
-        
-        -- Create animated counter effect
-        vim.defer_fn(function()
-          local count = 0
-          local timer = vim.loop.new_timer()
-          timer:start(0, 30, vim.schedule_wrap(function()
-            count = count + math.ceil(stats.loaded / 10)
-            if count >= stats.loaded then
-              count = stats.loaded
-              timer:stop()
-            end
-            dashboard.section.footer.val[6] = '⚡ ' .. count .. '/' .. stats.count .. ' plugins in ' .. ms .. 'ms'
-            pcall(vim.cmd, 'AlphaRedraw')
-          end))
-        end, 100)
-        
-        return '⚡ 0/' .. stats.count .. ' plugins in ' .. ms .. 'ms'
-      end
-      
+
       dashboard.section.header.val = get_header()
-      
+
       -- Clean, minimal buttons with consistent spacing
       dashboard.section.buttons.val = {
         dashboard.button('f', '  Find file', ':Telescope find_files <CR>'),
@@ -304,7 +283,7 @@ return {
         dashboard.button('l', '  Lazy', ':Lazy<CR>'),
         dashboard.button('q', '  Quit', ':qa<CR>'),
       }
-      
+
       -- Footer with links and animated stats
       dashboard.section.footer.val = {
         '',
@@ -312,32 +291,30 @@ return {
         '',
         '  trevato.dev   •     github.com/trevato',
         '',
-        get_animated_stats(),
-        '',
       }
-      
+
       -- Styling
       dashboard.section.header.opts.hl = 'Function'
       dashboard.section.buttons.opts.hl = 'Normal'
-      dashboard.section.footer.opts.hl = 'Comment'
-      
+      dashboard.section.footer.opts.hl = 'Function'
+
       -- Center everything with fade-in animation
       dashboard.opts.layout = {
-        { type = 'padding', val = vim.fn.max({ 1, vim.fn.floor(vim.fn.winheight(0) * 0.1) }) },
+        { type = 'padding', val = vim.fn.max { 1, vim.fn.floor(vim.fn.winheight(0) * 0.1) } },
         dashboard.section.header,
         { type = 'padding', val = 2 },
         dashboard.section.buttons,
         { type = 'padding', val = 2 },
         dashboard.section.footer,
       }
-      
+
       -- Fade-in animation for dashboard
       vim.defer_fn(function()
-        vim.cmd('highlight AlphaHeader guifg=#7aa2f7 gui=bold')
-        vim.cmd('highlight AlphaButtons guifg=#9ece6a')
-        vim.cmd('highlight AlphaFooter guifg=#565f89')
+        vim.cmd 'highlight AlphaHeader guifg=#7aa2f7 gui=bold'
+        vim.cmd 'highlight AlphaButtons guifg=#9ece6a'
+        vim.cmd 'highlight AlphaFooter guifg=#565f89'
       end, 10)
-      
+
       -- Refresh on focus to update time
       vim.api.nvim_create_autocmd('User', {
         pattern = 'AlphaReady',
@@ -346,13 +323,12 @@ return {
             buffer = 0,
             callback = function()
               dashboard.section.header.val = get_header()
-              dashboard.section.footer.val[6] = get_stats()
-              vim.cmd('AlphaRedraw')
+              vim.cmd 'AlphaRedraw'
             end,
           })
         end,
       })
-      
+
       -- Hide statusline and tabline in dashboard
       vim.api.nvim_create_autocmd('User', {
         pattern = 'AlphaReady',
@@ -362,7 +338,7 @@ return {
           vim.opt.cmdheight = 0
         end,
       })
-      
+
       vim.api.nvim_create_autocmd('User', {
         pattern = 'AlphaClosed',
         callback = function()
@@ -371,7 +347,7 @@ return {
           vim.opt.cmdheight = 0
         end,
       })
-      
+
       alpha.setup(dashboard.config)
     end,
   },
