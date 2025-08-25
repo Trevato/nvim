@@ -242,31 +242,41 @@ return {
       local function get_greeting()
         local hour = tonumber(os.date '%H')
         local greeting
-        if hour < 12 then
-          greeting = '  Good morning'
-        elseif hour < 18 then
-          greeting = '  Good afternoon'
+        if hour < 6 then
+          greeting = '● AFTER HOURS ●'
+        elseif hour < 12 then
+          greeting = '● MORNING SHIFT ●'
+        elseif hour < 17 then
+          greeting = '● CORE HOURS ●'
+        elseif hour < 22 then
+          greeting = '● EVENING MODE ●'
         else
-          greeting = '  Good evening'
+          greeting = '● NIGHT OWL ●'
         end
         return greeting
       end
 
-      -- Personalized header with real-time info
+      -- Chicago tech scene header with more detail
       local function get_header()
+        -- Get system info
+        local hostname = vim.fn.hostname():upper()
+        local platform = vim.loop.os_uname().sysname:upper()
+
         return {
           '',
+          '    ╭───────────────────────────────────────────────────────────────╮',
+          '    │                                                               │',
+          '    │  ████████╗██████╗ ███████╗██╗   ██╗ █████╗ ████████╗ ██████╗  │',
+          '    │  ╚══██╔══╝██╔══██╗██╔════╝██║   ██║██╔══██╗╚══██╔══╝██╔═══██╗ │',
+          '    │     ██║   ██████╔╝█████╗  ██║   ██║███████║   ██║   ██║   ██║ │',
+          '    │     ██║   ██╔══██╗██╔══╝  ╚██╗ ██╔╝██╔══██║   ██║   ██║   ██║ │ ',
+          '    │     ██║   ██║  ██║███████╗ ╚████╔╝ ██║  ██║   ██║   ╚██████╔╝ │',
+          '    │     ╚═╝   ╚═╝  ╚═╝╚══════╝  ╚═══╝  ╚═╝  ╚═╝   ╚═╝    ╚═════╝  │',
+          '    │                                                               │',
+          '    │     ' .. platform .. ' // ' .. hostname .. string.rep(' ', math.max(0, 48 - #platform - #hostname)) .. '      │',
+          '    ╰───────────────────────────────────────────────────────────────╯',
           '',
-          '████████╗██████╗ ███████╗██╗   ██╗ █████╗ ████████╗ ██████╗ ',
-          '╚══██╔══╝██╔══██╗██╔════╝██║   ██║██╔══██╗╚══██╔══╝██╔═══██╗',
-          '   ██║   ██████╔╝█████╗  ██║   ██║███████║   ██║   ██║   ██║',
-          '   ██║   ██╔══██╗██╔══╝  ╚██╗ ██╔╝██╔══██║   ██║   ██║   ██║',
-          '   ██║   ██║  ██║███████╗ ╚████╔╝ ██║  ██║   ██║   ╚██████╔╝',
-          '   ╚═╝   ╚═╝  ╚═╝╚══════╝  ╚═══╝  ╚═╝  ╚═╝   ╚═╝    ╚═════╝ ',
-          '',
-          get_greeting(),
-          os.date '  %A, %B %d, %Y',
-          '  ' .. os.date '%I:%M %p',
+          '         ' .. get_greeting(),
           '',
         }
       end
@@ -275,28 +285,37 @@ return {
 
       -- Clean, minimal buttons with consistent spacing
       dashboard.section.buttons.val = {
-        dashboard.button('f', '  Find file', ':Telescope find_files <CR>'),
-        dashboard.button('r', '  Recent', ':Telescope oldfiles <CR>'),
-        dashboard.button('g', '  Grep', ':Telescope live_grep <CR>'),
-        dashboard.button('n', '  New', ':ene <BAR> startinsert <CR>'),
-        dashboard.button('s', '  Session', ':SessionRestore <CR>'),
-        dashboard.button('l', '  Lazy', ':Lazy<CR>'),
-        dashboard.button('q', '  Quit', ':qa<CR>'),
+        dashboard.button('f', '▸  FIND FILE', ':Telescope find_files <CR>'),
+        dashboard.button('r', '▸  RECENT FILES', ':Telescope oldfiles <CR>'),
+        dashboard.button('g', '▸  SEARCH TEXT', ':Telescope live_grep <CR>'),
+        dashboard.button('n', '▸  NEW FILE', ':ene <BAR> startinsert <CR>'),
+        dashboard.button('l', '▸  LAZY PLUGINS', ':Lazy<CR>'),
+        dashboard.button('q', '▸  EXIT NEOVIM', ':qa<CR>'),
       }
 
-      -- Footer with links and animated stats
-      dashboard.section.footer.val = {
-        '',
-        '───────────────────────────────────────────────',
-        '',
-        '  trevato.dev   •     github.com/trevato',
-        '',
-      }
+      -- Footer with dynamic info
+      local function get_footer()
+        local stats = require('lazy').stats()
+        local ms = (math.floor(stats.startuptime * 100 + 0.5) / 100)
+        return {
+          '',
+          '────────────────────────────────────────────────',
+          '',
+          stats.loaded .. '/' .. stats.count .. ' MODULES // ' .. ms .. 'ms BOOT TIME',
+          '',
+          'CHICAGO // SYSTEM ONLINE',
+          '',
+          'trevato.dev // github.com/trevato',
+        }
+      end
+
+      -- Set initial footer (will be updated after lazy loads)
+      dashboard.section.footer.val = get_footer()
 
       -- Styling
-      dashboard.section.header.opts.hl = 'Function'
-      dashboard.section.buttons.opts.hl = 'Normal'
-      dashboard.section.footer.opts.hl = 'Function'
+      dashboard.section.header.opts.hl = 'AlphaHeader'
+      dashboard.section.buttons.opts.hl = 'AlphaButtons'
+      dashboard.section.footer.opts.hl = 'AlphaFooter'
 
       -- Center everything with fade-in animation
       dashboard.opts.layout = {
@@ -308,12 +327,103 @@ return {
         dashboard.section.footer,
       }
 
-      -- Fade-in animation for dashboard
+      -- Realistic neon flicker with Chicago underground tech vibes
+      local neon_pink = '#ff00aa'
+      local neon_cyan = '#00ffee'
+      local neon_white = '#ffffff'
+      local off_state = '#2a2a3e'
+      local dim_glow = '#4a4a5a'
+
+      -- Start completely off
+      vim.cmd('highlight AlphaHeader guifg=' .. off_state .. ' gui=bold')
+      vim.cmd('highlight AlphaButtons guifg=' .. off_state)
+      vim.cmd('highlight AlphaFooter guifg=' .. off_state)
+
+      -- Realistic power-on flicker sequence
+      local flicker_sequence = {
+        -- Initial surge attempts
+        { header = dim_glow, buttons = off_state, footer = off_state, delay = 80 },
+        { header = off_state, buttons = off_state, footer = off_state, delay = 120 },
+        { header = neon_pink, buttons = dim_glow, footer = off_state, delay = 20 },
+        { header = off_state, buttons = off_state, footer = off_state, delay = 60 },
+
+        -- Second attempt - partial power
+        { header = '#ff0088', buttons = '#004455', footer = dim_glow, delay = 40 },
+        { header = neon_pink, buttons = '#00aabb', footer = '#ff0066', delay = 30 },
+        { header = dim_glow, buttons = off_state, footer = off_state, delay = 50 },
+
+        -- Full power surge
+        { header = neon_pink, buttons = neon_cyan, footer = neon_white, delay = 15 },
+        { header = '#ff1199', buttons = '#11ffff', footer = '#cccccc', delay = 10 },
+        { header = neon_pink, buttons = neon_cyan, footer = neon_white, delay = 25 },
+        { header = '#ee0099', buttons = '#00ddcc', footer = '#aaaaaa', delay = 40 },
+
+        -- Stabilize with some flicker
+        { header = neon_pink, buttons = neon_cyan, footer = '#cccccc', delay = 80 },
+        { header = '#ff0099', buttons = '#00ffdd', footer = '#dddddd', delay = 20 },
+        { header = neon_pink, buttons = neon_cyan, footer = '#bbbbbb', delay = 150 },
+      }
+
+      -- Execute flicker sequence
+      local total_delay = 0
+      for _, step in ipairs(flicker_sequence) do
+        vim.defer_fn(function()
+          vim.cmd('highlight AlphaHeader guifg=' .. step.header .. ' gui=bold')
+          vim.cmd('highlight AlphaButtons guifg=' .. step.buttons)
+          vim.cmd('highlight AlphaFooter guifg=' .. step.footer)
+          vim.cmd 'redraw!'
+        end, total_delay)
+        total_delay = total_delay + step.delay
+      end
+
+      -- Random micro-flickers after stabilization (like real neon)
       vim.defer_fn(function()
-        vim.cmd 'highlight AlphaHeader guifg=#7aa2f7 gui=bold'
-        vim.cmd 'highlight AlphaButtons guifg=#9ece6a'
-        vim.cmd 'highlight AlphaFooter guifg=#565f89'
-      end, 10)
+        local flicker_timer = vim.loop.new_timer()
+        local flicker_count = 0
+
+        flicker_timer:start(
+          3000,
+          4000,
+          vim.schedule_wrap(function()
+            -- Random chance of micro-flicker
+            if math.random() > 0.7 then
+              -- Quick flicker effect
+              vim.cmd 'highlight AlphaHeader guifg=#dd0088 gui=bold'
+              vim.cmd 'highlight AlphaButtons guifg=#00ddcc'
+              vim.defer_fn(function()
+                vim.cmd('highlight AlphaHeader guifg=' .. neon_pink .. ' gui=bold')
+                vim.cmd('highlight AlphaButtons guifg=' .. neon_cyan)
+                vim.cmd 'highlight AlphaFooter guifg=#bbbbbb'
+              end, 50)
+            end
+
+            -- Occasional complete flicker
+            if math.random() > 0.95 then
+              vim.cmd('highlight AlphaHeader guifg=' .. dim_glow .. ' gui=bold')
+              vim.cmd('highlight AlphaButtons guifg=' .. off_state)
+              vim.defer_fn(function()
+                vim.cmd('highlight AlphaHeader guifg=' .. neon_pink .. ' gui=bold')
+                vim.cmd('highlight AlphaButtons guifg=' .. neon_cyan)
+                vim.cmd 'highlight AlphaFooter guifg=#aaaaaa'
+              end, 100)
+            end
+
+            flicker_count = flicker_count + 1
+            if flicker_count > 20 then
+              flicker_timer:stop()
+            end
+          end)
+        )
+      end, total_delay + 1000)
+
+      -- Update footer with stats after lazy loads
+      vim.api.nvim_create_autocmd('User', {
+        pattern = 'LazyVimStarted',
+        callback = function()
+          dashboard.section.footer.val = get_footer()
+          pcall(vim.cmd.AlphaRedraw)
+        end,
+      })
 
       -- Refresh on focus to update time
       vim.api.nvim_create_autocmd('User', {
