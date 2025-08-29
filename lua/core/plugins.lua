@@ -14,6 +14,34 @@ require('lazy').setup({
   -- Import all plugin specs from the plugins directory
   { import = 'plugins' },
 }, {
+  defaults = {
+    lazy = true, -- Default all plugins to lazy loading
+  },
+  performance = {
+    cache = {
+      enabled = true,
+    },
+    reset_packpath = true,
+    rtp = {
+      reset = true,
+      disabled_plugins = {
+        'gzip',
+        'matchit',
+        'matchparen',
+        'netrwPlugin',
+        'tarPlugin',
+        'tohtml',
+        'tutor',
+        'zipPlugin',
+      },
+    },
+  },
+  checker = {
+    enabled = false, -- Don't automatically check for updates
+  },
+  change_detection = {
+    notify = false, -- Don't notify on config changes
+  },
   ui = {
     -- Icons configuration based on Nerd Font availability
     icons = vim.g.have_nerd_font and {} or {

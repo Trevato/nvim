@@ -146,10 +146,45 @@ return {
     priority = 1000,
     opts = {
       bigfile = { enabled = true },
-      notifier = { enabled = true },
+      notifier = { 
+        enabled = true,
+        timeout = 3000,
+        width = { min = 40, max = 0.4 },
+        height = { min = 1, max = 0.6 },
+        top_down = false,
+      },
       quickfile = { enabled = true },
       statuscolumn = { enabled = false }, -- We have our own
       words = { enabled = true },
+      dashboard = {
+        enabled = true,
+        preset = {
+          header = [[
+          ███╗   ██╗███████╗ ██████╗ ██╗   ██╗██╗███╗   ███╗         
+          ████╗  ██║██╔════╝██╔═══██╗██║   ██║██║████╗ ████║         
+          ██╔██╗ ██║█████╗  ██║   ██║██║   ██║██║██╔████╔██║         
+          ██║╚██╗██║██╔══╝  ██║   ██║╚██╗ ██╔╝██║██║╚██╔╝██║         
+          ██║ ╚████║███████╗╚██████╔╝ ╚████╔╝ ██║██║ ╚═╝ ██║         
+          ╚═╝  ╚═══╝╚══════╝ ╚═════╝   ╚═══╝  ╚═╝╚═╝     ╚═╝         
+          ]],
+          keys = {
+            { icon = ' ', key = 'f', desc = 'Find File', action = ':Telescope find_files' },
+            { icon = ' ', key = 'n', desc = 'New File', action = ':ene | startinsert' },
+            { icon = ' ', key = 'g', desc = 'Find Text', action = ':Telescope live_grep' },
+            { icon = ' ', key = 'r', desc = 'Recent Files', action = ':Telescope oldfiles' },
+            { icon = ' ', key = 'c', desc = 'Config', action = ':Telescope find_files cwd=~/.config/nvim' },
+            { icon = '󰒲 ', key = 'L', desc = 'Lazy', action = ':Lazy' },
+            { icon = ' ', key = 'q', desc = 'Quit', action = ':qa' },
+          },
+        },
+      },
+      terminal = {
+        enabled = true,
+        win = {
+          position = 'float',
+          border = 'rounded',
+        },
+      },
       indent = {
         enabled = false, -- Using mini.indentscope
       },
@@ -157,12 +192,20 @@ return {
         enabled = false, -- Using mini.indentscope
       },
       scroll = {
-        enabled = false, -- Using native smoothscroll
+        enabled = false, -- Using neoscroll
       },
       animate = {
-        enabled = false, -- Using mini.animate
+        enabled = false, -- Minimal animations only
       },
     },
+    config = function(_, opts)
+      require('snacks').setup(opts)
+      
+      -- Set up keymaps for snacks features
+      vim.keymap.set('n', '<leader>gg', function() require('snacks').terminal.toggle('lazygit') end, { desc = 'LazyGit' })
+      vim.keymap.set('n', '<leader>tt', function() require('snacks').terminal.toggle() end, { desc = 'Toggle Terminal' })
+      vim.keymap.set('n', '<leader>un', function() require('snacks.notifier').hide() end, { desc = 'Dismiss Notifications' })
+    end,
   },
 
   -- Cache everything possible

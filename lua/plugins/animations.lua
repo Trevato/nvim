@@ -1,20 +1,5 @@
 -- Stable, subtle animations that enhance without distraction
 return {
-  -- Smooth scrolling only
-  {
-    'karb94/neoscroll.nvim',
-    event = 'VeryLazy',
-    config = function()
-      require('neoscroll').setup({
-        mappings = { '<C-u>', '<C-d>', '<C-b>', '<C-f>' },
-        hide_cursor = false,
-        stop_eof = true,
-        respect_scrolloff = false,
-        cursor_scrolls_alone = true,
-        easing_function = 'cubic',
-      })
-    end,
-  },
   
   -- Highlight yanked text
   {
