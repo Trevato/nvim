@@ -11,12 +11,8 @@ return {
     config = function()
       local lspconfig = require('lspconfig')
       
-      -- Get blink.cmp capabilities if available
-      local capabilities = vim.lsp.protocol.make_client_capabilities()
-      local has_blink, blink = pcall(require, 'blink.cmp')
-      if has_blink then
-        capabilities = blink.get_lsp_capabilities(capabilities)
-      end
+      -- Get blink.cmp capabilities (required for proper completion)
+      local capabilities = require('blink.cmp').get_lsp_capabilities()
       
       -- TypeScript/JavaScript (vtsls is 5x faster than ts_ls)
       lspconfig.vtsls.setup({
@@ -47,16 +43,64 @@ return {
         },
       })
       
-      -- Python
-      lspconfig.pyright.setup({
+      -- Python - using basedpyright (modern fork with better features)
+      lspconfig.basedpyright.setup({
         capabilities = capabilities,
+        on_attach = function(client, bufnr)
+          -- Use dynamic python path detection
+          local function get_python_path(workspace)
+            -- Check for uv virtual environment first
+            local uv_python = workspace .. '/.venv/bin/python'
+            if vim.fn.filereadable(uv_python) == 1 then
+              return uv_python
+            end
+            
+            -- Check for standard venv
+            local venv_python = workspace .. '/venv/bin/python'
+            if vim.fn.filereadable(venv_python) == 1 then
+              return venv_python
+            end
+            
+            -- Fallback to system python
+            return vim.fn.exepath('python3') or vim.fn.exepath('python') or 'python'
+          end
+          
+          client.config.settings.python = vim.tbl_deep_extend('force', client.config.settings.python or {}, {
+            pythonPath = get_python_path(client.config.root_dir)
+          })
+        end,
         settings = {
-          python = {
+          basedpyright = {
+            disableOrganizeImports = true, -- Let Ruff handle this
             analysis = {
               autoSearchPaths = true,
               useLibraryCodeForTypes = true,
-              typeCheckingMode = 'basic',
+              typeCheckingMode = 'standard', -- 'strict' for more checks, 'off' for linting-only
+              diagnosticMode = 'openFilesOnly', -- 'workspace' for all files
+              autoImportCompletions = true,
+              diagnosticSeverityOverrides = {
+                reportUnusedImport = 'information',
+                reportUnusedVariable = 'information',
+              },
             },
+          },
+          python = {
+            venvPath = '.',
+          },
+        },
+      })
+      
+      -- Ruff for ultra-fast Python linting/formatting
+      lspconfig.ruff.setup({
+        capabilities = capabilities,
+        on_attach = function(client, _)
+          -- Disable hover in favor of basedpyright
+          client.server_capabilities.hoverProvider = false
+        end,
+        init_options = {
+          settings = {
+            -- Ruff settings
+            args = {},
           },
         },
       })
@@ -136,6 +180,30 @@ return {
         local hl = 'DiagnosticSign' .. type
         vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
       end
+      
+      -- LSP debugging helper command
+      vim.api.nvim_create_user_command('LspDebug', function()
+        local clients = vim.lsp.get_active_clients()
+        if #clients == 0 then
+          print('No active LSP clients')
+          return
+        end
+        for _, client in ipairs(clients) do
+          print(string.format('LSP: %s (id=%d, root=%s)', client.name, client.id, client.config.root_dir or 'none'))
+        end
+      end, { desc = 'Show active LSP clients' })
+      
+      -- Python path debug command
+      vim.api.nvim_create_user_command('PythonPath', function()
+        local clients = vim.lsp.get_active_clients({ name = 'basedpyright' })
+        if #clients == 0 then
+          print('basedpyright is not running')
+          return
+        end
+        local client = clients[1]
+        local python_path = client.config.settings.python and client.config.settings.python.pythonPath or 'not set'
+        print('Python path: ' .. python_path)
+      end, { desc = 'Show Python path used by basedpyright' })
     end,
   },
 }
