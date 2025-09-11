@@ -13,7 +13,6 @@ return {
   { import = 'plugins.ui' },
   { import = 'plugins.editor' },
   { import = 'plugins.navigation' },
-  { import = 'plugins.ai' },
   { import = 'plugins.completion' },
   { import = 'plugins.lsp' },
   { import = 'plugins.git' },

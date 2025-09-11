@@ -106,11 +106,8 @@ lua/
 - **telescope.nvim**: Fuzzy finder for everything
 - **oil.nvim**: File management as text editing
 
-### Completion & AI
+### Completion
 - **blink.cmp**: Ultra-fast completion (10x faster than nvim-cmp)
-- **Supermaven**: Fastest AI autocomplete (10x faster than Copilot)
-- **Copilot**: Fallback AI assistance
-- **CopilotChat**: AI chat with `<leader>cc`
 
 ### Editor Enhancement
 - **treesitter**: Syntax highlighting and code understanding
@@ -120,7 +117,7 @@ lua/
 
 ### Performance Features
 - **bigfile.nvim**: Disables features for large files
-- **garbage-day.nvim**: LSP garbage collection
+- ~~**garbage-day.nvim**: LSP garbage collection~~ (disabled - incompatible with Neovim 0.11.x)
 - **neoscroll.nvim**: Smooth scrolling
 - **vim-startuptime**: Profile startup with `:StartupTime`
 

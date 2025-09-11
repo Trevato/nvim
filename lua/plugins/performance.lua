@@ -46,6 +46,7 @@ return {
   -- Garbage collection optimization
   {
     'zeioth/garbage-day.nvim',
+    enabled = false, -- Disabled due to compatibility issue with Neovim 0.11.x
     event = 'VeryLazy',
     dependencies = 'neovim/nvim-lspconfig',
     opts = {
