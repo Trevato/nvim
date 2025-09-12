@@ -230,7 +230,8 @@ return {
     end,
   },
 
-  -- Dashboard (clean startup screen)
+  -- Dashboard removed (using Snacks dashboard instead)
+  --[[
   {
     'goolord/alpha-nvim',
     event = 'VimEnter',
@@ -461,4 +462,5 @@ return {
       alpha.setup(dashboard.config)
     end,
   },
+  --]]
 }

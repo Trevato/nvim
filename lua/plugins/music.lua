@@ -13,7 +13,8 @@ return {
   {
     'gruvw/strudel.nvim',
     build = 'npm install',
-    lazy = false, -- Required for .str filetype detection
+    ft = { 'strudel', 'str' }, -- Lazy load only for music files
+    cmd = { 'StrudelLaunch', 'StrudelToggle', 'StrudelUpdate', 'StrudelQuit', 'StrudelStop', 'StrudelExecute' }, -- Load on command
     config = function()
       require('strudel').setup({
         -- Performance optimizations
