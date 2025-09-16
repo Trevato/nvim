@@ -11,10 +11,19 @@ return {
   -- Import all plugin categories
   { import = 'plugins.theme' }, -- Load theme first
   { import = 'plugins.ui' },
+  { import = 'plugins.ux' }, -- Revolutionary UX enhancements
   { import = 'plugins.editor' },
   { import = 'plugins.navigation' },
   { import = 'plugins.completion' },
   { import = 'plugins.lsp' },
+  { import = 'plugins.lsp-memory' }, -- LSP memory management
   { import = 'plugins.git' },
   { import = 'plugins.tools' },
+  { import = 'plugins.python' }, -- Python development
+  { import = 'plugins.focus' }, -- Focus mode & sessions
+  { import = 'plugins.animations' }, -- Subtle animations
+  { import = 'plugins.notifications' }, -- Enhanced notifications
+  { import = 'plugins.performance' }, -- Performance optimizations
+  { import = 'plugins.performance-monitor' }, -- Performance monitoring
+  { import = 'plugins.music' }, -- Strudel live coding (conditional)
 }

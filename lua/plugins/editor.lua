@@ -351,10 +351,7 @@ return {
         },
       })
       
-      -- Keymaps for formatting
-      vim.keymap.set('n', '<leader>f', function()
-        require('conform').format({ async = true, lsp_format = 'fallback' })
-      end, { desc = '[F]ormat buffer' })
+      -- Note: Main formatting keymap <leader>f is defined in core/keymaps.lua
       
       -- Organize imports
       vim.keymap.set('n', '<leader>fo', function()

@@ -21,27 +21,8 @@ return {
     lazy = false, -- Many plugins depend on this
   },
 
-  -- Better large file handling
-  {
-    'LunarVim/bigfile.nvim',
-    lazy = false,
-    config = function()
-      require('bigfile').setup({
-        filesize = 2, -- Size in MB
-        pattern = { '*' },
-        features = {
-          'indent_blankline',
-          'illuminate',
-          'lsp',
-          'treesitter',
-          'syntax',
-          'matchparen',
-          'vimopts',
-          'filetype',
-        },
-      })
-    end,
-  },
+  -- Note: Using snacks.nvim bigfile functionality instead of standalone bigfile.nvim
+  -- to avoid conflicts and reduce plugin count
 
   -- Garbage collection optimization
   {
@@ -186,7 +167,7 @@ return {
       -- Set up keymaps for snacks features
       vim.keymap.set('n', '<leader>gg', function() require('snacks').terminal.toggle('lazygit') end, { desc = 'LazyGit' })
       vim.keymap.set('n', '<leader>tt', function() require('snacks').terminal.toggle() end, { desc = 'Toggle Terminal' })
-      vim.keymap.set('n', '<leader>un', function() require('snacks.notifier').hide() end, { desc = 'Dismiss Notifications' })
+      -- Note: <leader>un for dismiss notifications is defined in core/keymaps.lua with snacks fallback
     end,
   },
 

@@ -11,19 +11,7 @@ return {
     end,
   },
   
-  -- Indent scope animation
-  {
-    'echasnovski/mini.indentscope',
-    event = { 'BufReadPost', 'BufNewFile' },
-    opts = {
-      symbol = '│',
-      options = { try_as_border = true },
-      draw = {
-        delay = 100,
-        animation = function(s, n) return 20 end,
-      },
-    },
-  },
+  -- Note: mini.indentscope is configured in ux.lua with more comprehensive settings
   
   -- Cursor word highlighting
   {

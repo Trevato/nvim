@@ -5,6 +5,25 @@ return {
     event = { 'BufReadPre', 'BufNewFile' },
     dependencies = {
       { 'williamboman/mason.nvim', config = true },
+      {
+        'williamboman/mason-lspconfig.nvim',
+        opts = {
+          ensure_installed = {
+            'vtsls', -- TypeScript/JavaScript (5x faster)
+            'basedpyright', -- Python
+            'lua_ls', -- Lua
+            'eslint', -- Linting
+            'tailwindcss', -- Tailwind
+            'html', -- HTML
+            'cssls', -- CSS
+            'jsonls', -- JSON
+            'yamlls', -- YAML
+            'taplo', -- TOML
+            'marksman', -- Markdown
+          },
+          automatic_installation = true,
+        },
+      },
       { 'j-hui/fidget.nvim', opts = {} },
       'saghen/blink.cmp',
     },
@@ -154,9 +173,10 @@ return {
           -- Actions
           vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, opts)
           vim.keymap.set({ 'n', 'v' }, '<leader>ca', vim.lsp.buf.code_action, opts)
-          vim.keymap.set('n', '<leader>f', function()
+          -- Format command available via :Format or <leader>f (defined in core/keymaps.lua)
+          vim.api.nvim_buf_create_user_command(ev.buf, 'Format', function()
             vim.lsp.buf.format { async = true }
-          end, opts)
+          end, { desc = 'Format buffer with LSP' })
           
           -- Signature help
           vim.keymap.set('i', '<C-k>', vim.lsp.buf.signature_help, opts)

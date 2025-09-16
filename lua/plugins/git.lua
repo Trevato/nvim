@@ -82,9 +82,7 @@ return {
     dependencies = {
       'nvim-lua/plenary.nvim',
     },
-    keys = {
-      { '<leader>gg', '<cmd>LazyGit<cr>', desc = 'LazyGit' },
-    },
+    -- LazyGit keymap <leader>gg is defined in performance.lua via snacks.nvim
   },
   
   -- Diffview: Enhanced diff and merge tools
