@@ -230,8 +230,7 @@ return {
     end,
   },
 
-  -- Dashboard removed (using Snacks dashboard instead)
-  --[[
+  -- Personalized dashboard
   {
     'goolord/alpha-nvim',
     event = 'VimEnter',
@@ -288,7 +287,8 @@ return {
       dashboard.section.buttons.val = {
         dashboard.button('f', '▸  FIND FILE', ':Telescope find_files <CR>'),
         dashboard.button('r', '▸  RECENT FILES', ':Telescope oldfiles <CR>'),
-        dashboard.button('g', '▸  SEARCH TEXT', ':Telescope live_grep <CR>'),
+        dashboard.button('g', '▸  GIT STATUS', ':LazyGit<CR>'),
+        dashboard.button('t', '▸  SEARCH TEXT', ':Telescope live_grep <CR>'),
         dashboard.button('n', '▸  NEW FILE', ':ene <BAR> startinsert <CR>'),
         dashboard.button('l', '▸  LAZY PLUGINS', ':Lazy<CR>'),
         dashboard.button('q', '▸  EXIT NEOVIM', ':qa<CR>'),
@@ -462,5 +462,4 @@ return {
       alpha.setup(dashboard.config)
     end,
   },
-  --]]
 }

@@ -158,26 +158,7 @@ return {
       statuscolumn = { enabled = false }, -- We have our own
       words = { enabled = true },
       dashboard = {
-        enabled = true,
-        preset = {
-          header = [[
-          ███╗   ██╗███████╗ ██████╗ ██╗   ██╗██╗███╗   ███╗         
-          ████╗  ██║██╔════╝██╔═══██╗██║   ██║██║████╗ ████║         
-          ██╔██╗ ██║█████╗  ██║   ██║██║   ██║██║██╔████╔██║         
-          ██║╚██╗██║██╔══╝  ██║   ██║╚██╗ ██╔╝██║██║╚██╔╝██║         
-          ██║ ╚████║███████╗╚██████╔╝ ╚████╔╝ ██║██║ ╚═╝ ██║         
-          ╚═╝  ╚═══╝╚══════╝ ╚═════╝   ╚═══╝  ╚═╝╚═╝     ╚═╝         
-          ]],
-          keys = {
-            { icon = ' ', key = 'f', desc = 'Find File', action = ':Telescope find_files' },
-            { icon = ' ', key = 'n', desc = 'New File', action = ':ene | startinsert' },
-            { icon = ' ', key = 'g', desc = 'Find Text', action = ':Telescope live_grep' },
-            { icon = ' ', key = 'r', desc = 'Recent Files', action = ':Telescope oldfiles' },
-            { icon = ' ', key = 'c', desc = 'Config', action = ':Telescope find_files cwd=~/.config/nvim' },
-            { icon = '󰒲 ', key = 'L', desc = 'Lazy', action = ':Lazy' },
-            { icon = ' ', key = 'q', desc = 'Quit', action = ':qa' },
-          },
-        },
+        enabled = false, -- Using alpha-nvim for personalized dashboard
       },
       terminal = {
         enabled = true,
