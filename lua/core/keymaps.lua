@@ -15,6 +15,12 @@ end, { desc = '[F]ormat buffer' })
 -- Exit terminal mode with Esc-Esc
 keymap('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
+-- Command history and output (Noice integration)
+keymap('n', '<leader>sl', '<cmd>Noice last<cr>', { desc = 'Last command output' })
+keymap('n', '<leader>sh', '<cmd>Noice history<cr>', { desc = 'Command history' })
+keymap('n', '<leader>sa', '<cmd>Noice all<cr>', { desc = 'All messages' })
+keymap('n', '<leader>sc', '<cmd>Noice telescope<cr>', { desc = 'Search commands (Telescope)' })
+
 -- Disable arrow keys to encourage using hjkl
 keymap('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
 keymap('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')

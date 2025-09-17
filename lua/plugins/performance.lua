@@ -144,7 +144,8 @@ return {
       terminal = {
         enabled = true,
         win = {
-          position = 'float',
+          position = 'bottom',
+          height = 0.3,
           border = 'rounded',
         },
       },
@@ -167,6 +168,10 @@ return {
       -- Set up keymaps for snacks features
       vim.keymap.set('n', '<leader>gg', function() require('snacks').terminal.toggle('lazygit') end, { desc = 'LazyGit' })
       vim.keymap.set('n', '<leader>tt', function() require('snacks').terminal.toggle() end, { desc = 'Toggle Terminal' })
+      vim.keymap.set('n', '<leader>t1', function() require('snacks').terminal.toggle(nil, { id = 1 }) end, { desc = 'Terminal 1' })
+      vim.keymap.set('n', '<leader>t2', function() require('snacks').terminal.toggle(nil, { id = 2 }) end, { desc = 'Terminal 2' })
+      vim.keymap.set('n', '<leader>t3', function() require('snacks').terminal.toggle(nil, { id = 3 }) end, { desc = 'Terminal 3' })
+      vim.keymap.set('n', '<leader>tf', function() require('snacks').terminal.toggle(nil, { win = { position = 'float' }}) end, { desc = 'Floating Terminal' })
       -- Note: <leader>un for dismiss notifications is defined in core/keymaps.lua with snacks fallback
     end,
   },

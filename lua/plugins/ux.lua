@@ -17,7 +17,7 @@ return {
           cmdline = { pattern = '^:', icon = '  ', lang = 'vim' },
           search_down = { kind = 'search', pattern = '^/', icon = ' 󰍉 ', lang = 'regex' },
           search_up = { kind = 'search', pattern = '^%?', icon = ' 󰍉 ', lang = 'regex' },
-          filter = { pattern = '^:%s*!', icon = '  ', lang = 'bash' },
+          filter = { pattern = '^:%s*!', icon = ' 󰞷 ', lang = 'bash', title = ' Shell Command' },
           lua = { pattern = { '^:%s*lua%s+', '^:%s*lua%s*=%s*', '^:%s*=%s*' }, icon = '  ', lang = 'lua' },
           help = { pattern = '^:%s*he?l?p?%s+', icon = ' 󰋖 ' },
         },
@@ -42,10 +42,34 @@ return {
           timeout = 3000,
           top_down = false, -- Notifications from bottom
         },
+        cmdline_output = {
+          format = 'details',
+          replace = false,
+        },
       },
       popupmenu = {
         enabled = true,
         backend = 'nui',
+      },
+      redirect = {
+        view = 'popup',
+        filter = { event = 'msg_show' },
+      },
+      commands = {
+        all = {
+          view = 'popup',
+          opts = { enter = true, format = 'details' },
+          filter = {},
+        },
+        last = {
+          view = 'popup',
+          opts = { enter = true, format = 'details' },
+          filter = {},
+        },
+        history = {
+          view = 'split',
+          opts = { enter = true, format = 'details' },
+        },
       },
       lsp = {
         progress = {
@@ -91,6 +115,23 @@ return {
         },
       },
       routes = {
+        -- Display shell command output immediately
+        {
+          filter = {
+            event = 'msg_show',
+            kind = 'echo',
+          },
+          view = 'cmdline_output',
+        },
+        -- Show shell command execution and output
+        {
+          filter = {
+            event = 'msg_show',
+            kind = { '', 'echo', 'echomsg', 'echoerr', 'lua_error' },
+            find = '^:!',
+          },
+          view = 'cmdline_output',
+        },
         -- Hide annoying messages
         {
           filter = {

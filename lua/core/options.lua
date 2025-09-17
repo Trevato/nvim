@@ -4,6 +4,10 @@
 local opt = vim.opt
 local g = vim.g
 
+-- Leader key MUST be set first before any mappings
+g.mapleader = ' '
+g.maplocalleader = ' '
+
 -- Set to true if you have a Nerd Font installed
 g.have_nerd_font = true
 
@@ -144,9 +148,6 @@ vim.lsp.handlers['textDocument/signatureHelp'] = vim.lsp.with(vim.lsp.handlers.s
   border = _border,
 })
 
--- Leader key
-g.mapleader = ' '
-g.maplocalleader = ' '
 
 -- Disable netrw (we'll use Oil.nvim)
 g.loaded_netrw = 1
