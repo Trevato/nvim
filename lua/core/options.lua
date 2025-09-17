@@ -19,6 +19,14 @@ opt.showmode = false -- Don't show mode (statusline handles this)
 opt.showcmd = false -- Don't show command in bottom line
 opt.ruler = false -- Don't show cursor position
 
+-- Window Title (shows current file in terminal/window title)
+opt.title = true -- Enable setting terminal title
+opt.titlestring = '%t%m - NVIM' -- filename[modified] - NVIM
+opt.titlelen = 0 -- No truncation of title
+
+-- Winbar (shows filename at top of each split window)
+opt.winbar = ' %f %m ' -- Show file path with modified indicator
+
 -- Clean Editor
 opt.number = true -- Show line numbers
 opt.relativenumber = true -- Relative line numbers for easy jumps

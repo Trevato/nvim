@@ -60,6 +60,41 @@ api.nvim_create_autocmd('BufReadPost', {
   end,
 })
 
+-- Dynamic window title updates
+api.nvim_create_autocmd({ 'BufEnter', 'BufModifiedSet', 'BufWritePost', 'DirChanged' }, {
+  group = api.nvim_create_augroup('update_window_title', { clear = true }),
+  callback = function()
+    local filename = vim.fn.expand('%:t')
+    local filepath = vim.fn.expand('%:.')  -- Relative to working directory
+
+    -- Get the project directory name
+    local cwd = vim.fn.getcwd()
+    local project_name = vim.fn.fnamemodify(cwd, ':t')
+
+    if filename == '' then
+      filename = '[No Name]'
+      filepath = '[No Name]'
+    end
+
+    local modified = vim.bo.modified and ' [+]' or ''
+
+    -- Format: nvim:project/relative/path/to/file
+    local title = string.format('nvim:%s/%s%s', project_name, filepath, modified)
+
+    -- Handle special buffers
+    local buftype = vim.bo.buftype
+    if buftype == 'help' then
+      title = string.format('nvim:%s/help', project_name)
+    elseif buftype == 'terminal' then
+      title = string.format('nvim:%s/terminal', project_name)
+    elseif buftype == 'quickfix' then
+      title = string.format('nvim:%s/quickfix', project_name)
+    end
+
+    vim.opt.titlestring = title
+  end,
+})
+
 -- LSP autocmds are in the lsp.lua file to keep related code together
 
 -- Python-specific keybindings and settings
