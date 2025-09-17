@@ -18,6 +18,7 @@ opt.cmdheight = 1 -- Will be 0 with Noice.nvim
 opt.showmode = false -- Don't show mode (statusline handles this)
 opt.showcmd = false -- Don't show command in bottom line
 opt.ruler = false -- Don't show cursor position
+opt.showtabline = 0 -- Never show the tabline (the bar at the top)
 
 -- Window Title (shows current file in terminal/window title)
 opt.title = true -- Enable setting terminal title

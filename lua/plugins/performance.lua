@@ -205,6 +205,7 @@ return {
   -- Faster syntax highlighting for large files
   {
     'nvim-treesitter/nvim-treesitter-context',
+    enabled = false, -- Disabled to avoid duplicate context display with winbar
     event = 'BufRead',
     config = function()
       require('treesitter-context').setup({

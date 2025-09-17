@@ -454,7 +454,7 @@ return {
         pattern = 'AlphaClosed',
         callback = function()
           vim.opt.laststatus = 3
-          vim.opt.showtabline = 2
+          vim.opt.showtabline = 0  -- Keep tabline hidden
           vim.opt.cmdheight = 0
         end,
       })
