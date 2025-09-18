@@ -56,12 +56,12 @@ return {
         map('n', '<leader>hb', function()
           gs.blame_line({ full = true })
         end, 'Blame line')
-        map('n', '<leader>tb', gs.toggle_current_line_blame, 'Toggle blame')
+        map('n', '<leader>gb', gs.toggle_current_line_blame, 'Toggle blame')
         map('n', '<leader>hd', gs.diffthis, 'Diff against index')
         map('n', '<leader>hD', function()
           gs.diffthis('~')
         end, 'Diff against last commit')
-        map('n', '<leader>td', gs.toggle_deleted, 'Toggle deleted')
+        map('n', '<leader>gd', gs.toggle_deleted, 'Toggle deleted')
 
         -- Text object
         vim.keymap.set({ 'o', 'x' }, 'ih', ':<C-U>Gitsigns select_hunk<CR>', { buffer = bufnr, desc = 'Select hunk' })

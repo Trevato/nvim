@@ -362,14 +362,14 @@ return {
       end, { desc = '[F]ormat: [O]rganize imports' })
       
       -- Toggle auto-formatting
-      vim.keymap.set('n', '<leader>tf', function()
+      vim.keymap.set('n', '<leader>uF', function()
         vim.g.autoformat_enabled = not vim.g.autoformat_enabled
         if vim.g.autoformat_enabled then
           vim.notify('Auto-format enabled', vim.log.levels.INFO)
         else
           vim.notify('Auto-format disabled', vim.log.levels.INFO)
         end
-      end, { desc = '[T]oggle auto-[F]ormat on save' })
+      end, { desc = 'Toggle auto-format on save' })
       
       -- Show current auto-format status
       vim.keymap.set('n', '<leader>?f', function()
