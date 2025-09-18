@@ -19,6 +19,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Repository Overview
 Modern Neovim configuration evolved from kickstart.nvim, optimized for speed and beauty. Uses Lua exclusively with lazy.nvim plugin management and blink.cmp for blazing-fast completion.
 
+### Recent Design Changes
+- **Transparent UI**: All bars (winbar, statusline, tabline) have transparent backgrounds
+- **Window titles**: Each split shows filename at top, terminal title shows `nvim:project/file`
+- **Live command output**: `:Shell` command replaces `:!` for live streaming output
+- **Command palette**: Noice.nvim provides center-screen command input with proper labels
+
 ## Key Architecture
 
 ### Plugin Management
@@ -89,7 +95,11 @@ lua/
 
 ### Terminal & Git
 - **LazyGit**: `<leader>gg` (via snacks.nvim)
-- **Terminal**: `<leader>tt` (floating terminal)
+- **Terminal**: `<leader>tt` (persistent terminal at bottom)
+- **Multiple terminals**: `<leader>t1/t2/t3` (separate sessions)
+- **Floating terminal**: `<leader>tf`
+- **Shell command**: `:Shell <cmd>` (live output, replaces `:!`)
+- **Run with prompt**: `<leader>tr`
 - **Git signs**: See changes in gutter
 - **Diffview**: Review git changes
 
@@ -97,6 +107,12 @@ lua/
 - **Dismiss notifications**: `<leader>un`
 - **Copy errors**: `<leader>ue`
 - **Debug commands**: `:DebugInfo`, `:DebugErrors`
+
+### Command History
+- **Last command output**: `<leader>sl`
+- **Command history**: `<leader>sh`
+- **All messages**: `<leader>sa`
+- **Search commands**: `<leader>sc` (via Telescope)
 
 ## Plugin Ecosystem
 
@@ -116,10 +132,9 @@ lua/
 - **mini.nvim modules**: Surround, AI text objects, indentscope
 
 ### Performance Features
-- **bigfile.nvim**: Disables features for large files
-- ~~**garbage-day.nvim**: LSP garbage collection~~ (disabled - incompatible with Neovim 0.11.x)
-- **neoscroll.nvim**: Smooth scrolling
+- **bigfile.nvim**: Disables features for large files (via snacks.nvim)
 - **vim-startuptime**: Profile startup with `:StartupTime`
+- **toggleterm.nvim**: Proper terminal integration with live output
 
 ## Testing & Validation
 
