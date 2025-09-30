@@ -59,3 +59,8 @@ keymap('n', '<leader>ua', function()
   require('core.debug').copy_notifications()
 end, { desc = 'Copy [A]ll notifications to clipboard' })
 
+-- Image viewer
+keymap('n', '<leader>i', function()
+  require('snacks').image.open()
+end, { desc = 'View [I]mage' })
+

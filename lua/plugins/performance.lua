@@ -128,7 +128,7 @@ return {
     priority = 1000,
     opts = {
       bigfile = { enabled = true },
-      notifier = { 
+      notifier = {
         enabled = true,
         timeout = 3000,
         width = { min = 40, max = 0.4 },
@@ -138,6 +138,7 @@ return {
       quickfile = { enabled = true },
       statuscolumn = { enabled = false }, -- We have our own
       words = { enabled = true },
+      image = { enabled = true }, -- Image viewer for Ghostty with Kitty Graphics Protocol
       dashboard = {
         enabled = false, -- Using alpha-nvim for personalized dashboard
       },

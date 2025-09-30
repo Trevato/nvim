@@ -97,6 +97,9 @@ api.nvim_create_autocmd({ 'BufEnter', 'BufModifiedSet', 'BufWritePost', 'DirChan
 
 -- LSP autocmds are in the lsp.lua file to keep related code together
 
+-- Note: snacks.nvim image viewer automatically registers BufReadCmd autocmds
+-- when enabled, so no manual autocmd needed here
+
 -- Python-specific keybindings and settings
 api.nvim_create_autocmd('FileType', {
   group = api.nvim_create_augroup('python_settings', { clear = true }),
