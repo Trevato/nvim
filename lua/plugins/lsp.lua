@@ -142,6 +142,25 @@ return {
           },
         },
       })
+
+      -- PostgreSQL Language Server (primary for all SQL files)
+      lspconfig.postgres_lsp.setup({
+        capabilities = capabilities,
+        cmd = { vim.fn.expand('~/.local/bin/postgrestools'), 'lsp-proxy' },
+        filetypes = { 'sql', 'psql', 'pgsql', 'postgres' },
+        root_dir = lspconfig.util.root_pattern('supabase', 'postgrestools.jsonc', '.git', '.'),
+        settings = {},
+      })
+
+      -- SQL Language Server (only for MySQL files)
+      -- Only use for MySQL-specific files, not general SQL
+      lspconfig.sqlls.setup({
+        capabilities = capabilities,
+        cmd = { 'sql-language-server', 'up', '--method', 'stdio' },
+        filetypes = { 'mysql' },  -- Removed 'sql' to avoid conflict
+        root_dir = lspconfig.util.root_pattern('.sqllsrc.json'),
+        settings = {},
+      })
       
       -- ESLint (if available)
       pcall(function()

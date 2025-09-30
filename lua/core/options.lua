@@ -169,7 +169,6 @@ local disabled_built_ins = {
   'matchparen',
   'logiPat',
   'rrhelper',
-  'sql_completion',
 }
 
 for _, plugin in pairs(disabled_built_ins) do
