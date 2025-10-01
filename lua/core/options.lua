@@ -72,7 +72,6 @@ opt.writebackup = false -- Don't create backup before overwriting
 opt.swapfile = false -- Don't use swapfile
 opt.undofile = true -- Persistent undo
 opt.undolevels = 10000 -- Maximum undo levels
-opt.undodir = vim.fn.expand('$HOME') .. '/.vim/undodir'
 
 -- Better Completion Experience
 opt.completeopt = 'menu,menuone,noselect,preview' -- Better completion UX
@@ -106,9 +105,7 @@ opt.fillchars = {
 -- System Integration
 opt.mouse = 'a' -- Enable mouse support
 opt.mousemoveevent = true -- Mouse move events for hover
-vim.schedule(function()
-  opt.clipboard = 'unnamedplus' -- System clipboard
-end)
+opt.clipboard = 'unnamedplus' -- System clipboard
 
 -- Sessions (for auto-session)
 opt.sessionoptions = 'blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions'
@@ -139,41 +136,10 @@ vim.diagnostic.config({
   },
 })
 
--- Better floating windows
-local _border = 'rounded'
-vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, {
-  border = _border,
-})
-vim.lsp.handlers['textDocument/signatureHelp'] = vim.lsp.with(vim.lsp.handlers.signature_help, {
-  border = _border,
-})
-
 
 -- Disable netrw (we'll use Oil.nvim)
 g.loaded_netrw = 1
 g.loaded_netrwPlugin = 1
-
--- Performance: Disable some built-in plugins
-local disabled_built_ins = {
-  'gzip',
-  'zip',
-  'zipPlugin',
-  'tar',
-  'tarPlugin',
-  'getscript',
-  'getscriptPlugin',
-  'vimball',
-  'vimballPlugin',
-  '2html_plugin',
-  'matchit',
-  'matchparen',
-  'logiPat',
-  'rrhelper',
-}
-
-for _, plugin in pairs(disabled_built_ins) do
-  g['loaded_' .. plugin] = 1
-end
 
 -- Set GIT_EDITOR to use nvr if available
 if vim.fn.has('nvim') == 1 and vim.fn.executable('nvr') == 1 then

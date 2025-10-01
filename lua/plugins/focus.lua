@@ -130,24 +130,6 @@ return {
     end,
   },
 
-  -- Persistence (alternative session management)
-  {
-    'folke/persistence.nvim',
-    enabled = false, -- Using auto-session instead
-    event = 'BufReadPre',
-    opts = {
-      dir = vim.fn.expand(vim.fn.stdpath('state') .. '/sessions/'),
-      options = { 'buffers', 'curdir', 'tabpages', 'winsize', 'help', 'globals', 'skiprtp' },
-      pre_save = nil,
-      save_empty = false,
-    },
-    keys = {
-      { '<leader>qs', function() require('persistence').load() end, desc = 'Restore Session' },
-      { '<leader>ql', function() require('persistence').load({ last = true }) end, desc = 'Restore Last Session' },
-      { '<leader>qd', function() require('persistence').stop() end, desc = "Don't Save Current Session" },
-    },
-  },
-
   -- Better window management
   {
     'sindrets/winshift.nvim',
@@ -161,52 +143,5 @@ return {
       { '<leader>wk', '<cmd>WinShift up<cr>', desc = 'Win Shift Up' },
       { '<leader>wl', '<cmd>WinShift right<cr>', desc = 'Win Shift Right' },
     },
-  },
-
-  -- Focus window auto-resizing
-  {
-    'nvim-focus/focus.nvim',
-    enabled = false, -- Can be distracting, enable if desired
-    version = false,
-    config = function()
-      require('focus').setup({
-        enable = true,
-        commands = true,
-        autoresize = {
-          enable = true,
-          width = 120,
-          height = 0,
-          minwidth = 20,
-          minheight = 0,
-          height_quickfix = 10,
-        },
-        split = {
-          bufnew = false,
-          tmux = false,
-        },
-        ui = {
-          number = false,
-          relativenumber = false,
-          hybridnumber = false,
-          absolutenumber_unfocussed = false,
-          cursorline = true,
-          cursorcolumn = false,
-          colorcolumn = {
-            enable = false,
-            list = '+1',
-          },
-          signcolumn = true,
-          winhighlight = false,
-        },
-      })
-    end,
-  },
-
-  -- Distraction-free mode toggle utilities
-  {
-    'pocco81/true-zen.nvim',
-    enabled = false, -- Using zen-mode instead
-    cmd = { 'TZAtaraxis', 'TZMinimalist', 'TZNarrow', 'TZFocus' },
-    config = true,
   },
 }

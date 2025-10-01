@@ -29,9 +29,14 @@ return {
     },
     config = function()
       local lspconfig = require('lspconfig')
-      
+
       -- Get blink.cmp capabilities (required for proper completion)
       local capabilities = require('blink.cmp').get_lsp_capabilities()
+
+      -- Configure LSP floating window borders
+      local border = 'rounded'
+      vim.lsp.handlers['textDocument/hover'] = vim.lsp.with(vim.lsp.handlers.hover, { border = border })
+      vim.lsp.handlers['textDocument/signatureHelp'] = vim.lsp.with(vim.lsp.handlers.signature_help, { border = border })
       
       -- TypeScript/JavaScript (vtsls is 5x faster than ts_ls)
       lspconfig.vtsls.setup({

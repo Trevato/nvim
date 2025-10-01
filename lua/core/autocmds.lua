@@ -61,24 +61,17 @@ api.nvim_create_autocmd('BufReadPost', {
 })
 
 -- Dynamic window title updates
-api.nvim_create_autocmd({ 'BufEnter', 'BufModifiedSet', 'BufWritePost', 'DirChanged' }, {
+api.nvim_create_autocmd('BufEnter', {
   group = api.nvim_create_augroup('update_window_title', { clear = true }),
   callback = function()
-    local filename = vim.fn.expand('%:t')
-    local filepath = vim.fn.expand('%:.')  -- Relative to working directory
+    local filepath = vim.fn.expand('%:.')
+    local project_name = vim.fn.fnamemodify(vim.fn.getcwd(), ':t')
 
-    -- Get the project directory name
-    local cwd = vim.fn.getcwd()
-    local project_name = vim.fn.fnamemodify(cwd, ':t')
-
-    if filename == '' then
-      filename = '[No Name]'
+    if filepath == '' then
       filepath = '[No Name]'
     end
 
     local modified = vim.bo.modified and ' [+]' or ''
-
-    -- Format: nvim:project/relative/path/to/file
     local title = string.format('nvim:%s/%s%s', project_name, filepath, modified)
 
     -- Handle special buffers
@@ -99,48 +92,4 @@ api.nvim_create_autocmd({ 'BufEnter', 'BufModifiedSet', 'BufWritePost', 'DirChan
 
 -- Note: snacks.nvim image viewer automatically registers BufReadCmd autocmds
 -- when enabled, so no manual autocmd needed here
-
--- Python-specific keybindings and settings
-api.nvim_create_autocmd('FileType', {
-  group = api.nvim_create_augroup('python_settings', { clear = true }),
-  pattern = 'python',
-  callback = function()
-    -- Set Python-specific options
-    vim.opt_local.expandtab = true
-    vim.opt_local.shiftwidth = 4
-    vim.opt_local.softtabstop = 4
-    vim.opt_local.tabstop = 4
-    vim.opt_local.textwidth = 88 -- Black/Ruff default line length
-    
-    -- Python-specific keybindings
-    local opts = { buffer = true, silent = true }
-    
-    -- Quick imports
-    vim.keymap.set('n', '<leader>pi', function()
-      vim.lsp.buf.code_action({
-        apply = true,
-        context = {
-          only = { 'source.organizeImports' },
-        },
-      })
-    end, vim.tbl_extend('force', opts, { desc = 'Organize imports' }))
-    
-    -- Python debugging helpers
-    vim.keymap.set('n', '<leader>pb', 'obreakpoint()<Esc>', vim.tbl_extend('force', opts, { desc = 'Insert breakpoint()' }))
-    vim.keymap.set('n', '<leader>pB', 'Obreakpoint()<Esc>', vim.tbl_extend('force', opts, { desc = 'Insert breakpoint() above' }))
-    
-    -- Quick print statement
-    vim.keymap.set('n', '<leader>pp', 'oprint(f"{=}")<Esc>2F{a', vim.tbl_extend('force', opts, { desc = 'Insert print statement' }))
-    vim.keymap.set('v', '<leader>pp', 'yoprint(f"<C-r>": {<C-r>"=}")<Esc>', vim.tbl_extend('force', opts, { desc = 'Print selection' }))
-    
-    -- Type annotations
-    vim.keymap.set('n', '<leader>pt', function()
-      vim.lsp.buf.code_action({
-        apply = true,
-        context = {
-          only = { 'source.addMissingImports', 'source.fixMissingImports' },
-        },
-      })
-    end, vim.tbl_extend('force', opts, { desc = 'Add type imports' }))
-  end,
-})
+-- Note: Python-specific settings are now in ftplugin/python.lua

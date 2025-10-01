@@ -182,32 +182,6 @@ return {
 
   -- Removed mini.animate - keeping config minimal
 
-  -- Better input/select UI (like dressing room for Neovim)
-  {
-    'stevearc/dressing.nvim',
-    lazy = false,
-    opts = {
-      input = {
-        enabled = true,
-        default_prompt = '➤ ',
-        win_options = {
-          winblend = 10,
-          winhighlight = 'Normal:Normal,NormalFloat:Normal',
-        },
-      },
-      select = {
-        enabled = true,
-        backend = { 'telescope', 'builtin' },
-        builtin = {
-          win_options = {
-            winblend = 10,
-            winhighlight = 'Normal:Normal,NormalFloat:Normal',
-          },
-        },
-      },
-    },
-  },
-
   -- Indent guides (subtle, only show scope)
   {
     'echasnovski/mini.indentscope',

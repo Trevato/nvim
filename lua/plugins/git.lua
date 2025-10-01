@@ -61,7 +61,7 @@ return {
         map('n', '<leader>hD', function()
           gs.diffthis('~')
         end, 'Diff against last commit')
-        map('n', '<leader>gd', gs.toggle_deleted, 'Toggle deleted')
+        map('n', '<leader>gt', gs.toggle_deleted, 'Toggle deleted')
 
         -- Text object
         vim.keymap.set({ 'o', 'x' }, 'ih', ':<C-U>Gitsigns select_hunk<CR>', { buffer = bufnr, desc = 'Select hunk' })

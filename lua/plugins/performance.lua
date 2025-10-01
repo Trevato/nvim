@@ -1,10 +1,5 @@
 -- Performance optimizations for blazing fast Neovim
 return {
-  -- Faster startup with impatient (now built into Neovim 0.10+)
-  {
-    'lewis6991/impatient.nvim',
-    enabled = false, -- Built into Neovim 0.10+
-  },
 
   -- Profile startup time
   {
@@ -24,71 +19,8 @@ return {
   -- Note: Using snacks.nvim bigfile functionality instead of standalone bigfile.nvim
   -- to avoid conflicts and reduce plugin count
 
-  -- Garbage collection optimization
-  {
-    'zeioth/garbage-day.nvim',
-    enabled = false, -- Disabled due to compatibility issue with Neovim 0.11.x
-    event = 'VeryLazy',
-    dependencies = 'neovim/nvim-lspconfig',
-    opts = {
-      aggressive_mode = false,
-      excluded_lsp_clients = {},
-      grace_period = 60 * 15, -- 15 minutes
-      wakeup_delay = 3000,
-      notifications = false,
-    },
-  },
 
-  -- Smooth scrolling (performance-optimized)
-  {
-    'karb94/neoscroll.nvim',
-    enabled = false, -- Using native smoothscroll in Neovim 0.10+
-    event = 'WinScrolled',
-    config = function()
-      require('neoscroll').setup({
-        mappings = { '<C-u>', '<C-d>', '<C-b>', '<C-f>', '<C-y>', '<C-e>', 'zt', 'zz', 'zb' },
-        hide_cursor = true,
-        stop_eof = true,
-        use_local_scrolloff = false,
-        respect_scrolloff = false,
-        cursor_scrolls_alone = true,
-        easing_function = 'quadratic',
-        pre_hook = nil,
-        post_hook = nil,
-        performance_mode = true,
-      })
-    end,
-  },
 
-  -- Filetype detection optimization
-  {
-    'nathom/filetype.nvim',
-    enabled = false, -- Built into Neovim now
-    lazy = false,
-    config = function()
-      require('filetype').setup({
-        overrides = {
-          extensions = {
-            tf = 'terraform',
-            tfvars = 'terraform',
-            tfstate = 'json',
-            mdx = 'markdown',
-          },
-          literal = {
-            ['.eslintrc'] = 'json',
-            ['.prettierrc'] = 'json',
-            ['.babelrc'] = 'json',
-            ['.stylelintrc'] = 'json',
-          },
-          complex = {
-            ['.*%.env.*'] = 'sh',
-            ['.*%.config%.js'] = 'javascript',
-            ['.*%.config%.ts'] = 'typescript',
-          },
-        },
-      })
-    end,
-  },
 
   -- Defer plugin loading
   {
@@ -129,11 +61,7 @@ return {
     opts = {
       bigfile = { enabled = true },
       notifier = {
-        enabled = true,
-        timeout = 3000,
-        width = { min = 40, max = 0.4 },
-        height = { min = 1, max = 0.6 },
-        top_down = false,
+        enabled = false, -- Using noice.nvim + nvim-notify instead
       },
       quickfile = { enabled = true },
       statuscolumn = { enabled = false }, -- We have our own
@@ -208,24 +136,4 @@ return {
     },
   },
 
-  -- Faster syntax highlighting for large files
-  {
-    'nvim-treesitter/nvim-treesitter-context',
-    enabled = false, -- Disabled to avoid duplicate context display with winbar
-    event = 'BufRead',
-    config = function()
-      require('treesitter-context').setup({
-        enable = true,
-        max_lines = 3,
-        min_window_height = 0,
-        line_numbers = true,
-        multiline_threshold = 20,
-        trim_scope = 'outer',
-        mode = 'cursor',
-        separator = nil,
-        zindex = 20,
-        on_attach = nil,
-      })
-    end,
-  },
 }

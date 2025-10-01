@@ -36,19 +36,10 @@ keymap('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
 keymap('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 keymap('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
--- Notification management (using snacks if available, fallback to notify)
+-- Notification management (using nvim-notify via noice.nvim)
 keymap('n', '<leader>un', function()
-  local ok, snacks = pcall(require, 'snacks.notifier')
-  if ok then
-    snacks.hide()
-  else
-    require('notify').dismiss({ silent = true, pending = true })
-  end
+  require('notify').dismiss({ silent = true, pending = true })
 end, { desc = 'Dismiss all notifications' })
-
-keymap('n', '<leader>uN', function()
-  require('telescope').extensions.notify.notify()
-end, { desc = 'Search [N]otifications history' })
 
 -- Error management
 keymap('n', '<leader>ue', function()
